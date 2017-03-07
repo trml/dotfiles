@@ -1,0 +1,15 @@
+[alias]
+	co = checkout
+	ci = comitt
+	st = status
+	br = branch
+	hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
+	type = cat-file -t
+	dump = cat-file -p
+[push]
+	default = simple
+[core]
+	pager = less -+F -+X
+[user]
+	name=#TODO
+	email=#TODO@users.noreply.github.com

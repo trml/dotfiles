@@ -1,0 +1,122 @@
+#!/bin/bash
+
+# global variable for caching the output from stow, to save time
+STOW_OUTPUT=$(mktemp)
+
+function get_stow_output()
+{
+	2>&1 stow --no -v $1 $2 -R --adopt $3
+}
+
+function all_symlinks()
+{
+	cat $STOW_OUTPUT | awk '/^UNLINK/ {print $2}'
+}
+
+function linkable_files()
+{
+	cat $STOW_OUTPUT | awk '/^LINK/ {print $2}'
+}
+
+function adoptable_files()
+{
+	cat $STOW_OUTPUT | awk '/^MV/ {print $2}'
+}
+
+function alive_symlinks()
+{
+	local TMP0=$(mktemp)
+	local TMP1=$(mktemp)
+	all_symlinks > $TMP0
+	linkable_files > $TMP1
+	comm -12 <(sort < $TMP0) <(sort < $TMP1)
+}
+
+function dead_symlinks()
+{
+	local TMP0=$(mktemp)
+	local TMP1=$(mktemp)
+	all_symlinks > $TMP0
+	linkable_files > $TMP1
+	comm -23 <(sort < $TMP0) <(sort < $TMP1)
+}
+
+function unlinked_files()
+{
+	local TMP0=$(mktemp)
+	local TMP1=$(mktemp)
+	all_symlinks > $TMP0
+	linkable_files > $TMP1
+	comm -13 <(sort < $TMP0) <(sort < $TMP1)
+}
+
+function new_files()
+{
+	local TMP0=$(mktemp)
+	local TMP1=$(mktemp)
+	unlinked_files > $TMP0
+	adoptable_files > $TMP1
+	comm -23 <(sort < $TMP0) <(sort < $TMP1)
+}
+
+if [ $# == 3 ] && [ $1 == "--restore-files" ]; then
+STOWDIR=$3
+TARGETDIR=$2
+[ ! "$TARGETDIR" = "/" ] && TARGET="--target=$TARGETDIR"
+cd $STOWDIR
+for d in *; do
+	get_stow_output --dir=$STOWDIR --target=$TARGETDIR $d > $STOW_OUTPUT
+	TMP=$(mktemp)
+	alive_symlinks --dir=$STOWDIR --target=$TARGETDIR $d > $TMP
+	stow --dir=$STOWDIR --target=$TARGETDIR --delete $d
+	for f in `cat $TMP`; do
+		mkdir -p $TARGETDIR/$(dirname $f)
+		cp -n $d/$f $TARGETDIR/$f
+	done
+done
+fi
+
+
+if [ $# == 3 ] && [ $1 == "--show-managed-files" ]; then
+STOWDIR=$3
+TARGETDIR=$2
+[ ! "$TARGETDIR" = "/" ] && DIR=$TARGETDIR
+cd $STOWDIR
+for d in *; do
+	get_stow_output --dir=$STOWDIR --target=$TARGETDIR $d > $STOW_OUTPUT
+	for f in `alive_symlinks --dir=$STOWDIR --target=$TARGETDIR $d`; do
+		echo "($d) $DIR/$f"
+	done
+done
+fi
+
+if [ $# == 3 ] && [ $1 == "--show-unlinked-files" ]; then
+STOWDIR=$3
+TARGETDIR=$2
+[ ! "$TARGETDIR" = "/" ] && DIR=$TARGETDIR
+cd $STOWDIR
+for d in *; do
+	get_stow_output --dir=$STOWDIR --target=$TARGETDIR $d > $STOW_OUTPUT
+	for f in `new_files --dir=$STOWDIR --target=$TARGETDIR $d`; do
+		echo "($d) $DIR/$f"
+	done
+	for f in `adoptable_files --dir=$STOWDIR --target=$TARGETDIR $d`; do
+		echo "($d) $DIR/$f *"
+	done
+done
+fi
+
+if [ $# == 3 ] && [ $1 == "--show-dead-symlinks" ]; then
+STOWDIR=$3
+TARGETDIR=$2
+[ ! "$TARGETDIR" = "/" ] && DIR=$TARGETDIR
+cd $STOWDIR
+for d in *; do
+	get_stow_output --dir=$STOWDIR --target=$TARGETDIR $d > $STOW_OUTPUT
+	for f in `dead_symlinks --dir=$STOWDIR --target=$TARGETDIR $d`; do
+		echo "($d) $DIR/$f"
+	done
+done
+fi
+
+exit 0
