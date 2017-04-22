@@ -54,8 +54,8 @@ compinit
 autoload -U zmv
 
 # exports, aliases and functions
-export SUDO_EDITOR="/bin/vim"
-export VISUAL="/bin/vim"
+export SUDO_EDITOR='/bin/vim'
+export VISUAL='/bin/vim'
 export EDITOR='/bin/vim'
 export ZAW_EDITOR='/bin/vim'
 export SDL_AUDIODRIVER=alsa
@@ -65,6 +65,7 @@ export PATH=/usr/bin:/bin/:$PATH
 export PATH=$HOME/bin:$PATH
 export PATH=$HOME/build/nim/bin:$PATH
 export PATH=$HOME/.nimble/bin:$PATH
+export XDG_DATA_HOME=$HOME
 
 alias valgrind-callgrind='/bin/valgrind --tool=callgrind --dump-line=yes --dump-instr=yes --collect-jumps=yes --collect-systime=yes --cache-sim=yes --branch-sim=yes -v --instr-atstart=no'
 alias mmv='noglob zmv -W'
