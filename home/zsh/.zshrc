@@ -54,10 +54,10 @@ compinit
 autoload -U zmv
 
 # exports, aliases and functions
-export SUDO_EDITOR='/bin/vim'
-export VISUAL='/bin/vim'
-export EDITOR='/bin/vim'
-export ZAW_EDITOR='/bin/vim'
+export SUDO_EDITOR='/usr/bin/vim'
+export VISUAL='/usr/bin/vim'
+export EDITOR='/usr/bin/vim'
+export ZAW_EDITOR='/usr/bin/vim'
 export SDL_AUDIODRIVER=alsa
 export REPORTTIME=1
 export PATH=/usr/lib:$PATH
