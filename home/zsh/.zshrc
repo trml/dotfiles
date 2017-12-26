@@ -7,11 +7,12 @@ antigen use oh-my-zsh # this command should be applied before loading zaw since 
 antigen bundle colored-man-pages
 antigen bundle command-not-found
 antigen bundle copybuffer
-antigen bundle themes
+#antigen bundle themes
 antigen bundle vundle
 antigen bundle zsh_reload
 antigen bundle zsh-users/zsh-syntax-highlighting
-antigen theme robbyrussell
+#antigen theme robbyrussell
+antigen theme "$DOTFILES/local" fishy-custom.zsh-theme --no-local-clone
 antigen apply
 
 # zaw (ctrl-R history search)
@@ -65,6 +66,7 @@ export PATH=/usr/bin:/bin/:$PATH
 export PATH=$HOME/bin:$PATH
 export PATH=$HOME/build/nim/bin:$PATH
 export PATH=$HOME/.nimble/bin:$PATH
+export PATH=$DOTFILES/bin:$PATH
 export XDG_DATA_HOME=$HOME
 
 alias valgrind-callgrind='/bin/valgrind --tool=callgrind --dump-line=yes --dump-instr=yes --collect-jumps=yes --collect-systime=yes --cache-sim=yes --branch-sim=yes -v --instr-atstart=no'
@@ -81,9 +83,18 @@ alias locate='/usr/bin/locate --database=$HOME/.locate.db'
 alias mountrw='mount -o gid=users,fmask=113,dmask=002'
 alias sourcezsh='source $HOME/.zshrc'
 alias sship='$(echo $SSH_CLIENT | awk '\''{ print $1}'\'')'
+alias connectedscreen='$(xrandr -q | grep " connected" | awk "{print $1}" | head -1)'
 
 function grer() {
 /bin/grep -rna --color=always --include "*.*" --exclude="*.o" --exclude="*.a" --exclude="*.dll" --exclude-dir ".*" ${@} | /bin/cut -c1-200
+}
+
+function mtex() {
+	pdflatex main && pdflatex main && bibtex main && pdflatex main && pdflatex main
+}
+
+function maketex() {
+	pdflatex "$@" && pdflatex "$@" && bibtex "$@" && pdflatex "$@" && pdflatex "$@"
 }
 
 function dotfiles() {
