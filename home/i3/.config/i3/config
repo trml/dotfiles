@@ -58,8 +58,8 @@ bindsym $mod+Up focus up
 bindsym $mod+Right focus right
 
 # alt tab current workspace
-bindsym $a+Tab focus next
-bindsym $a+Shift+Tab focus prev
+#bindsym $a+Tab focus next
+#bindsym $a+Shift+Tab focus prev
 
 # move focused window
 bindsym $a+Shift+j move left 80 px
@@ -129,6 +129,9 @@ bindsym $a+Shift+c reload
 bindsym $a+Shift+r restart
 # exit i3 (logs you out of your X session)
 bindsym $a+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
+
+# tmux
+#bindsym $+Tab exec --no-startup-id amixer -D hw:2 set Headphone 1+
 
 # faster resize binds, similar to oponbox tiling keybinds
 bindsym ctrl+$a+Left resize shrink right 80 px or 5 ppt resize grow left 0 px or 5 ppt

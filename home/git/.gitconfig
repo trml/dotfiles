@@ -11,5 +11,5 @@
 [core]
 	pager = less -+F -+X
 [user]
-	name=#TODO
-	email=#TODO@users.noreply.github.com
+	name = trml
+	email = trml@noreply.github.com

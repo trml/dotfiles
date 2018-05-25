@@ -86,7 +86,7 @@ alias sship='$(echo $SSH_CLIENT | awk '\''{ print $1}'\'')'
 alias connectedscreen='$(xrandr -q | grep " connected" | awk "{print $1}" | head -1)'
 
 function grer() {
-/bin/grep -rna --color=always --include "*.*" --exclude="*.o" --exclude="*.a" --exclude="*.dll" --exclude-dir ".*" ${@} | /bin/cut -c1-200
+/bin/grep -rna --color=always --include "*.*" --exclude="*.o" --exclude="*.a" --exclude="*.dll" --exclude-dir ".*" ${@} | /bin/cut -c1-400 | less
 }
 
 function mtex() {
@@ -131,6 +131,16 @@ key[PageDown]=${terminfo[knp]}
 [[ -n "${key[Right]}"    ]]  && bindkey  "${key[Right]}"    forward-char
 [[ -n "${key[PageUp]}"   ]]  && bindkey  "${key[PageUp]}"   beginning-of-buffer-or-history
 [[ -n "${key[PageDown]}" ]]  && bindkey  "${key[PageDown]}" end-of-buffer-or-history
+
+my-script_widget() tmux next-window
+zle -N my-script_widget
+bindkey '^[\t' my-script_widget
+#bindkey '^[\t' 
+#bindkey 'Alt+
+#bindkey '^[[Z' reverse-menu-complete
+#
+#'^[\t''^[\t'
+
 
 # set xfce4-terminal to use 8-bit colors
 if [[ -e /usr/share/terminfo/x/xterm-256color ]] && [[ "$COLORTERM" == "xfce4-terminal" ]]; then

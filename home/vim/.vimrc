@@ -11,11 +11,13 @@ filetype off " required for Vundle
 
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
+Plugin 'VundleVim/Vundle.vim'
 Plugin 'vim-scripts/restore_view.vim'
 Plugin 'scrooloose/nerdcommenter'
 Plugin 'JuliaLang/julia-vim'
 Plugin 'tpope/vim-fugitive'
 Plugin 'altercation/vim-colors-solarized'
+Plugin 'zah/nim.vim'
 call vundle#end()            " required
 filetype plugin indent on " required for Vundle
 
@@ -23,8 +25,9 @@ set viewoptions=cursor,folds,slash,unix
 " let g:skipview_files = ['*\.vim']
 
 set grepprg=grep\ -nH\ $*
-let g:tex_flavor = "latex"
-let g:Tex_DefaultTargetFormat='pdf'
+"let g:tex_flavor = "latex"
+"let g:Tex_DefaultTargetFormat='pdf'
+" set runtimepath=~/.vim,$VIM/vimfiles,$VIMRUNTIME,$VIM/vimfiles/after,~/.vim/after
 
 " allow backspacing over everything in insert mode
 set backspace=indent,eol,start
@@ -69,8 +72,9 @@ set softtabstop=4
 
 set listchars=nbsp:█
 
-autocmd Filetype nim,nimrod setlocal ts=4 sw=4 sts=4 expandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
-autocmd Filetype c,cpp,h setlocal ts=4 sw=4 sts=0 noexpandtab cinoptions+=g0 list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
+"autocmd Filetype c,cpp,h setlocal ts=4 sw=4 sts=0 noexpandtab cinoptions+=g0 list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
+autocmd Filetype c,cpp,h setlocal ts=4 sw=4 sts=0 noexpandtab cinoptions+=g0
+autocmd Filetype julia,matlab,octave,python,nim,nimrod setlocal ts=4 sw=4 sts=4 expandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
 
 syntax enable
 
@@ -102,3 +106,6 @@ set background=dark
 
 set backupdir=~/.vim/tmp
 set directory=~/.vim/tmp
+
+"autocmd filetype c nnoremap <F4> :w <bar> exec '!gcc '.shellescape('%').' -o '.shellescape('%:r').' && ./'.shellescape('%:r')<CR>
+autocmd filetype tex nnoremap <F5> :w <bar> exec '!bibtex '.shellescape('%:r').' && !pdflatex '.shellescape('%:r')<CR>
