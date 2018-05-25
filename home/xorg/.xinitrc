@@ -14,7 +14,10 @@ xmodmap -e "keycode 111 = Up NoSymbol Up NoSymbol Prior Prior" # Shift-Up = Page
 xmodmap -e "keycode 116 = Down NoSymbol Down NoSymbol Next Next" # Shift-Down = PageDown
 xmodmap -e "control keycode 111 = Home" # Control-Up = Home
 xmodmap -e "control keycode 116 = End" # Cotrol-Down = End
-pulseaudio --start
+# pulseaudio --start # pulseaudio doesnt work with current working .asoundrc, so leave commented
 pidgin &
 touchegg &
+udiskie -ant2 &
+parcellite -n &
+pgrep redshift &> /dev/null || redshift -b 1.0:0.8 -t 5500:2500 &> /dev/null &
 exec i3
