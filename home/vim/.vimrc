@@ -9,16 +9,21 @@ endif
 set nocompatible
 filetype off " required for Vundle
 
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-Plugin 'VundleVim/Vundle.vim'
-Plugin 'vim-scripts/restore_view.vim'
-Plugin 'scrooloose/nerdcommenter'
-Plugin 'JuliaLang/julia-vim'
-Plugin 'tpope/vim-fugitive'
-Plugin 'altercation/vim-colors-solarized'
-Plugin 'zah/nim.vim'
-call vundle#end()            " required
+" Use plug instead of Vundle
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs --insecure
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+call plug#begin('~/.vim/plugged')
+Plug 'vim-scripts/restore_view.vim'
+Plug 'scrooloose/nerdcommenter'
+Plug 'JuliaLang/julia-vim'
+Plug 'tpope/vim-fugitive'
+Plug 'altercation/vim-colors-solarized'
+Plug 'zah/nim.vim'
+call plug#end()
+
 filetype plugin indent on " required for Vundle
 
 set viewoptions=cursor,folds,slash,unix
@@ -63,7 +68,7 @@ if !exists(":DiffOrig")
  \ | wincmd p | diffthis
 endif
 
-source /usr/share/vim/vim80/macros/matchit.vim
+source /usr/share/vim/vim82/macros/matchit.vim
 set shiftwidth=4
 set tabstop=4
 set noexpandtab
@@ -74,9 +79,14 @@ set listchars=nbsp:█
 
 "autocmd Filetype c,cpp,h setlocal ts=4 sw=4 sts=0 noexpandtab cinoptions+=g0 list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
 autocmd Filetype c,cpp,h setlocal ts=4 sw=4 sts=0 noexpandtab cinoptions+=g0
+"autocmd Filetype julia,matlab,octave,python,nim,nimrod setlocal ts=4 sw=4 sts=4 expandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
 autocmd Filetype julia,matlab,octave,python,nim,nimrod setlocal ts=4 sw=4 sts=4 expandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
+autocmd Filetype nim,nimrod setlocal ts=2 sw=2 sts=2 expandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
+autocmd Filetype musicxml setlocal ts=2 sw=2 sts=2 expandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
+autocmd Filetype xml setlocal ts=2 sw=2 sts=2 expandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
 
 syntax enable
+syntax on
 
 set clipboard^=unnamedplus
 set pastetoggle=<F10>
@@ -103,9 +113,13 @@ let mapleader = "."
 
 colorscheme solarized
 set background=dark
+"set background=dark
 
 set backupdir=~/.vim/tmp
 set directory=~/.vim/tmp
 
 "autocmd filetype c nnoremap <F4> :w <bar> exec '!gcc '.shellescape('%').' -o '.shellescape('%:r').' && ./'.shellescape('%:r')<CR>
 autocmd filetype tex nnoremap <F5> :w <bar> exec '!bibtex '.shellescape('%:r').' && !pdflatex '.shellescape('%:r')<CR>
+
+set exrc
+set secure

@@ -36,7 +36,7 @@ pcm.dmixed
 			}
 			# Play with this value, if you get errors "unable to set buffer size" or "underrun occured"
 			# 4320 is effective minimum with hda-intel, but flash in firefox needs roughly 5000, otherwise flash may be silent.
-			buffer_size 5000
+			buffer_size 8000
 			period_time 0
 			#period_size 512
 			#periods 2

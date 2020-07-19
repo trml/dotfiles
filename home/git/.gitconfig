@@ -12,4 +12,4 @@
 	pager = less -+F -+X
 [user]
 	name = trml
-	email = trml@noreply.github.com
+	email = trml@users.noreply.github.com

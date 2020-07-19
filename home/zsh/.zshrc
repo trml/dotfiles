@@ -1,5 +1,16 @@
 [ -L $HOME/.zshrc ] && DOTFILES=$(cd $HOME/`readlink $HOME/.zshrc | xargs dirname` && git rev-parse --show-toplevel)
 
+# The following lines were added by compinstall
+zstyle :compinstall filename '$HOME/.zshrc'
+autoload -U compinit
+
+#fpath=(/usr/local/share/zsh-completions $fpath)
+#rm -f "$HOME/.zcompdump"
+compinit -u -D
+
+# End of lines added by compinstall
+
+
 if [ ! $DOTFILES = "" ]; then
 # antigen
 source $DOTFILES/antigen/antigen.zsh
@@ -45,13 +56,6 @@ setopt completealiases
 unsetopt beep notify
 bindkey -e
 
-# The following lines were added by compinstall
-zstyle :compinstall filename '$HOME/.zshrc'
-
-autoload -U compinit
-compinit
-# End of lines added by compinstall
-
 autoload -U zmv
 
 # exports, aliases and functions
@@ -64,7 +68,7 @@ export REPORTTIME=1
 export PATH=/usr/lib:$PATH
 export PATH=/usr/bin:/bin/:$PATH
 export PATH=$HOME/bin:$PATH
-export PATH=$HOME/build/nim/bin:$PATH
+export PATH=$HOME/build/nim-lang-nim/bin:$PATH
 export PATH=$HOME/.nimble/bin:$PATH
 export PATH=$DOTFILES/bin:$PATH
 export XDG_DATA_HOME=$HOME
@@ -74,7 +78,7 @@ alias mmv='noglob zmv -W'
 alias reswap='sudo /bin/swapoff -a && sudo /bin/swapon -a'
 alias ls='/bin/ls --color=auto'
 #alias packer='/bin/packer-color'
-alias viless='/usr/share/vim/vim80/macros/less.sh'
+alias viless='/usr/share/vim/vim81/macros/less.sh'
 alias grep='/bin/grep --color=auto'
 alias gret='/bin/git log --all -p | /bin/grep -inI --color=auto --exclude-dir ".*"'
 alias sudo='/bin/sudo '
@@ -84,9 +88,11 @@ alias mountrw='mount -o gid=users,fmask=113,dmask=002'
 alias sourcezsh='source $HOME/.zshrc'
 alias sship='$(echo $SSH_CLIENT | awk '\''{ print $1}'\'')'
 alias connectedscreen='$(xrandr -q | grep " connected" | awk "{print $1}" | head -1)'
+alias i3lock='i3lock --color=000000'
+alias bam5='$HOME/build/matricks-bam/bam'
 
 function grer() {
-/bin/grep -rna --color=always --include "*.*" --exclude="*.o" --exclude="*.a" --exclude="*.dll" --exclude-dir ".*" ${@} | /bin/cut -c1-400 | less
+/bin/grep -rna --color=always --include "*.*" --exclude="*.o" --exclude="*.a" --exclude="*.dll" --exclude-dir ".*" --exclude-dir="nimcache" ${@} | /bin/cut -c1-400 | less
 }
 
 function mtex() {
