@@ -8,9 +8,6 @@ autoload -U compinit
 #rm -f "$HOME/.zcompdump"
 compinit -u -D
 
-# End of lines added by compinstall
-
-
 if [ ! $DOTFILES = "" ]; then
 # antigen
 source $DOTFILES/antigen/antigen.zsh
@@ -18,12 +15,16 @@ antigen use oh-my-zsh # this command should be applied before loading zaw since 
 antigen bundle colored-man-pages
 antigen bundle command-not-found
 antigen bundle copybuffer
-#antigen bundle themes
-antigen bundle vundle
+#antigen bundle vundle
 antigen bundle zsh_reload
 antigen bundle zsh-users/zsh-syntax-highlighting
-#antigen theme robbyrussell
-antigen theme "$DOTFILES/local" fishy-custom.zsh-theme --no-local-clone
+antigen bundle zsh-users/zsh-autosuggestions
+antigen bundle zsh-users/zsh-completions
+antigen bundle wting/autojump
+antigen bundle supercrabtree/k
+antigen bundle themes
+antigen theme robbyrussell
+#antigen theme "$DOTFILES/local" fishy-custom.zsh-theme --no-local-clone
 antigen apply
 
 # zaw (ctrl-R history search)
@@ -59,10 +60,10 @@ bindkey -e
 autoload -U zmv
 
 # exports, aliases and functions
-export SUDO_EDITOR='/usr/bin/vim'
-export VISUAL='/usr/bin/vim'
-export EDITOR='/usr/bin/vim'
-export ZAW_EDITOR='/usr/bin/vim'
+export SUDO_EDITOR='/usr/bin/nvim'
+export VISUAL='/usr/bin/nvim'
+export EDITOR='/usr/bin/nvim'
+export ZAW_EDITOR='/usr/bin/nvim'
 export SDL_AUDIODRIVER=alsa
 export REPORTTIME=1
 export PATH=/usr/lib:$PATH

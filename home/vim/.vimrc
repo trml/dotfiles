@@ -7,9 +7,7 @@ endif
 " Use Vim settings, rather than Vi settings (much better!).
 " This must be first, because it changes other options as a side effect.
 set nocompatible
-filetype off " required for Vundle
 
-" Use plug instead of Vundle
 if empty(glob('~/.vim/autoload/plug.vim'))
   silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs --insecure
     \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
@@ -20,11 +18,10 @@ Plug 'vim-scripts/restore_view.vim'
 Plug 'scrooloose/nerdcommenter'
 Plug 'JuliaLang/julia-vim'
 Plug 'tpope/vim-fugitive'
-Plug 'altercation/vim-colors-solarized'
+"Plug 'altercation/vim-colors-solarized'
 Plug 'zah/nim.vim'
+Plug 'iCyMind/NeoSolarized'
 call plug#end()
-
-filetype plugin indent on " required for Vundle
 
 set viewoptions=cursor,folds,slash,unix
 " let g:skipview_files = ['*\.vim']
@@ -111,7 +108,7 @@ let g:lightline = {
       \ }
 let mapleader = "."
 
-colorscheme solarized
+colorscheme NeoSolarized
 set background=dark
 "set background=dark
 
