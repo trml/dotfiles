@@ -22,9 +22,19 @@
 #udiskie -ant2 &
 #parcellite -n &
 #pgrep redshift &> /dev/null || redshift -b 1.0:0.8 -t 5500:2500 &> /dev/null &
-setxkbmap -layout no
-xmodmap -e 'clear Lock'
-xmodmap -e 'keycode 0x42 = Escape'
+#xmodmap -e 'clear Lock'
+#xmodmap -e 'keycode 0x42 = Escape'
+# bind altgr+comma/period to < and >
 #xmodmap -e "keycode 58 = Escape" & # swap escape and super key
 #xmodmap -e "keycode 9 = Super_L" # swap escape and super key
+nm-applet &
+
+setxkbmap -layout no -option caps:escape -option nbsp:none
+xmodmap -e 'keycode 0x3b = comma semicolon comma semicolon less dead_ogonek dead_cedilla' # bind altgr+comma/period to < and >
+xmodmap -e 'keycode 0x3c = period colon period colon greater periodcentered ellipsis'
+
+xinput --set-prop "SYNA32A0:00 06CB:CE14 Touchpad" "libinput Tapping Enabled" 1
+bluetoothctl power on
+bluetoothctl agent on
+
 exec i3

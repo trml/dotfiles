@@ -21,6 +21,10 @@ Plug 'tpope/vim-fugitive'
 "Plug 'altercation/vim-colors-solarized'
 Plug 'zah/nim.vim'
 Plug 'iCyMind/NeoSolarized'
+Plug 'wlangstroth/vim-racket'
+Plug 'jpalardy/vim-slime'
+Plug 'vim-pandoc/vim-pandoc'
+Plug 'vim-pandoc/vim-pandoc-syntax'
 call plug#end()
 
 set viewoptions=cursor,folds,slash,unix
@@ -74,19 +78,20 @@ set softtabstop=4
 
 set listchars=nbsp:█
 
-"autocmd Filetype c,cpp,h setlocal ts=4 sw=4 sts=0 noexpandtab cinoptions+=g0 list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
-autocmd Filetype c,cpp,h setlocal ts=4 sw=4 sts=0 noexpandtab cinoptions+=g0
-"autocmd Filetype julia,matlab,octave,python,nim,nimrod setlocal ts=4 sw=4 sts=4 expandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
+autocmd Filetype c,cpp,h setlocal ts=4 sw=4 sts=0 noexpandtab cinoptions+=g0 list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
 autocmd Filetype julia,matlab,octave,python,nim,nimrod setlocal ts=4 sw=4 sts=4 expandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
-autocmd Filetype nim,nimrod setlocal ts=2 sw=2 sts=2 expandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
 autocmd Filetype musicxml setlocal ts=2 sw=2 sts=2 expandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
 autocmd Filetype xml setlocal ts=2 sw=2 sts=2 expandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
+autocmd Filetype nim,nimrod setlocal ts=2 sw=2 sts=2 expandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
+"autocmd Filetype c,cpp,h setlocal ts=4 sw=4 sts=0 noexpandtab cinoptions+=g0
+"autocmd Filetype julia,matlab,octave,python,nim,nimrod setlocal ts=4 sw=4 sts=4 expandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
 
 syntax enable
 syntax on
 
 set clipboard^=unnamedplus
 set pastetoggle=<F10>
+set viminfo='20,<1000,s1000
 nmap <F8> :tabp<cr>
 nmap <F9> :tabn<cr>
 

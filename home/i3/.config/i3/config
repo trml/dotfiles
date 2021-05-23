@@ -35,7 +35,8 @@ floating_modifier $a
 bindsym $a+Return exec lxterminal
 
 # kill focused window
-bindsym $a+Shift+q kill
+bindsym ctrl+Shift+q kill
+bindsym Mod1+F4 kill
 
 # start dmenu (a program launcher)
 bindsym $a+p exec dmenu_run
@@ -52,10 +53,10 @@ bindsym $mod+l focus up
 bindsym $mod+m focus right
 
 # alternatively, you can use the cursor keys:
-bindsym $mod+Left focus left
-bindsym $mod+Down focus down
-bindsym $mod+Up focus up
-bindsym $mod+Right focus right
+bindsym $a+Left focus left
+bindsym $a+Down focus down
+bindsym $a+Up focus up
+bindsym $a+Right focus right
 
 # alt tab current workspace
 #bindsym $a+Tab focus next
@@ -80,7 +81,8 @@ bindsym $a+h split h
 bindsym $a+v split v
 
 # enter fullscreen mode for the focused container
-bindsym $mod+f fullscreen toggle
+bindsym $a+f fullscreen toggle
+bindsym $a+g fullscreen toggle global
 
 # change container layout (stacked, tabbed, toggle split)
 bindsym $a+s layout stacking
@@ -197,6 +199,9 @@ bindsym XF86AudioRaiseVolume exec --no-startup-id pactl amixer -D hw:2 set Headp
 bindsym XF86AudioLowerVolume exec --no-startup-id pactl amixer -D hw:2 set Headphone 1-
 bindsym XF86AudioMute exec --no-startup-id amixer -D hw:2 set Headphone toggle
 
+bindsym XF86MonBrightnessUp exec --no-startup-id xbacklight -inc 5
+bindsym XF86MonBrightnessDown exec --no-startup-id xbacklight -dec 5
+
 bindsym F8 exec --no-startup-id amixer -D hw:2 set Headphone toggle
 bindsym F9 exec --no-startup-id amixer -D hw:2 set Headphone 1-
 bindsym F10 exec --no-startup-id amixer -D hw:2 set Headphone 1+
@@ -240,3 +245,13 @@ client.focused			#657b83 #657b83 #93a1a1 #657b83
 client.focused_inactive #002b36 #002b36 #eee8d5 #002b36
 client.unfocused		#002b36 #002b36 #93a1a1 #002b36
 client.urgent			#d33682 #d33682 #fdf6e3 #dc322f
+
+
+exec "setxkbmap -layout no"
+exec "xmodmap -e 'clear Lock'"
+exec "xmodmap -e 'keycode 0x42 = Escape'"
+# bind altgr+comma/period to < and >
+exec "xmodmap -e 'keycode 0x3b = comma semicolon comma semicolon less dead_ogonek dead_cedilla'"
+exec "xmodmap -e 'keycode 0x3c = period colon period colon greater periodcentered ellipsis'"
+
+#fake-outputs 1280x1440+0+0,1280x1440+1280+0
