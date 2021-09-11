@@ -1,3 +1,31 @@
+######################################################
+################    zgen    ##########################
+######################################################
+
+# load zgen
+source "${HOME}/dotfiles/zgen/zgen.zsh"
+
+# if the init scipt doesn't exist
+if ! zgen saved; then
+	zgen oh-my-zsh
+	zgen oh-my-zsh plugins/git
+	zgen oh-my-zsh plugins/sudo
+	zgen oh-my-zsh plugins/command-not-found
+	zgen oh-my-zsh plugins/zsh_reload
+	zgen load zsh-users/zsh-syntax-highlighting
+	zgen load zsh-users/zsh-autosuggestions
+	zgen loadall <<EOPLUGINS # bulk load
+EOPLUGINS
+	# ^ can't indent this
+	zgen load zsh-users/zsh-completions src
+	zgen oh-my-zsh themes/robbyrussell
+	zgen save # save all to init script
+fi
+
+######################################################
+##############    settings    ########################
+######################################################
+
 HISTFILE=~/.histfile
 HISTSIZE=10000
 SAVEHIST=$HISTSIZE
@@ -53,7 +81,6 @@ alias valgrind-callgrind='/bin/valgrind --tool=callgrind --dump-line=yes --dump-
 alias mmv='noglob zmv -W'
 alias reswap='sudo /bin/swapoff -a && sudo /bin/swapon -a'
 alias ls='/bin/ls --color=auto'
-#alias packer='/bin/packer-color'
 alias viless='/usr/share/vim/vim81/macros/less.sh'
 alias grep='/bin/grep --color=auto'
 alias gret='/bin/git log --all -p | /bin/grep -inI --color=auto --exclude-dir ".*"'
@@ -67,35 +94,16 @@ alias connectedscreen='$(xrandr -q | grep " connected" | awk "{print $1}" | head
 alias i3lock='i3lock --color=000000'
 alias bam5='$HOME/build/matricks-bam/bam'
 alias vim='nvim'
-alias keyboard='$HOME/.set_keyboard'
+alias keyboard='sh $HOME/dotfiles/bin/keyboard.sh'
 
 function grer() {
 /bin/grep -rna --color=always --include "*.*" --exclude="*.o" --exclude="*.a" --exclude="*.dll" --exclude-dir ".*" --exclude-dir="nimcache" ${@} | /bin/cut -c1-400 | less
 }
 
 ######################################################
-################    zaw     ##########################
-######################################################
-
-source /usr/share/zaw/zaw.zsh
-bindkey "^X" zaw
-bindkey "^R" zaw-history    # Ctrl-R history search
-bindkey "^F" zaw-git-files  # Ctrl-F git file search
-bindkey -M filterselect "^R" down-line-or-history
-bindkey -M filterselect "^S" up-line-or-history
-bindkey -M filterselect "^E" accept-search
-bindkey -M filterselect "^A" accept-search
-zstyle ':filter-select:highlight' matched fg=green
-zstyle ':filter-select' max-lines -2
-zstyle ':filter-select' rotate-list yes
-zstyle ':filter-select' case-insensitive yes
-zstyle ':filter-select' hist-find-no-dups yes
-
-
-######################################################
 #################   conda    #########################
 ######################################################
-#
+
 __conda_setup="$('/opt/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
 if [ $? -eq 0 ]; then
 	eval "$__conda_setup"
@@ -109,25 +117,19 @@ fi
 unset __conda_setup
 
 ######################################################
-################    zgen    ##########################
+################    zaw     ##########################
 ######################################################
 
-# load zgen
-source "${HOME}/.zgen/zgen.zsh"
-
-# if the init scipt doesn't exist
-if ! zgen saved; then
-	zgen oh-my-zsh
-	zgen oh-my-zsh plugins/git
-	zgen oh-my-zsh plugins/sudo
-	zgen oh-my-zsh plugins/command-not-found
-	zgen oh-my-zsh plugins/zsh_reload
-	zgen load zsh-users/zsh-syntax-highlighting
-	zgen load zsh-users/zsh-autosuggestions
-	zgen loadall <<EOPLUGINS # bulk load
-EOPLUGINS
-	# ^ can't indent this
-	zgen load zsh-users/zsh-completions src
-	zgen oh-my-zsh themes/robbyrussell
-	zgen save # save all to init script
-fi
+source $HOME/dotfiles/zaw/zaw.zsh
+bindkey "^X" zaw
+bindkey "^R" zaw-history    # Ctrl-R history search
+bindkey "^F" zaw-git-files  # Ctrl-F git file search
+bindkey -M filterselect "^R" down-line-or-history
+bindkey -M filterselect "^S" up-line-or-history
+bindkey -M filterselect "^E" accept-search
+bindkey -M filterselect "^A" accept-search
+zstyle ':filter-select:highlight' matched fg=green
+zstyle ':filter-select' max-lines -2
+zstyle ':filter-select' rotate-list yes
+zstyle ':filter-select' case-insensitive yes
+zstyle ':filter-select' hist-find-no-dups yes

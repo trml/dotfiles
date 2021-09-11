@@ -62,9 +62,11 @@ status:
 	@echo "Managed files:"
 	@./functions-sh --show-managed-files $(_TARGETHOME) $(_STOWHOME)
 	@./functions-sh --show-managed-files $(_TARGETROOT) $(_STOWROOT)
+	@echo ""
 	@echo "Unlinked files (* = existing files):"
 	@./functions-sh --show-unlinked-files $(_TARGETHOME) $(_STOWHOME)
 	@./functions-sh --show-unlinked-files $(_TARGETROOT) $(_STOWROOT)
+	@echo ""
 	@echo "Dead symlinks:"
 	@./functions-sh --show-dead-symlinks $(_TARGETHOME) $(_STOWHOME)
 	@./functions-sh --show-dead-symlinks $(_TARGETROOT) $(_STOWROOT)
