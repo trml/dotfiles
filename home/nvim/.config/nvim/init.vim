@@ -70,7 +70,6 @@ set tabstop=2
 set noexpandtab
 set cmdheight=1
 set softtabstop=2
-
 set listchars=nbsp:█
 
 autocmd Filetype c,cpp,h setlocal ts=4 sw=4 sts=0 noexpandtab cinoptions+=g0

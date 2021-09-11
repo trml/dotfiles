@@ -1,31 +1,3 @@
-######################################################
-################    zgen    ##########################
-######################################################
-
-# load zgen
-source "${HOME}/dotfiles/zgen/zgen.zsh"
-
-# if the init scipt doesn't exist
-if ! zgen saved; then
-	zgen oh-my-zsh
-	zgen oh-my-zsh plugins/git
-	zgen oh-my-zsh plugins/sudo
-	zgen oh-my-zsh plugins/command-not-found
-	zgen oh-my-zsh plugins/zsh_reload
-	zgen load zsh-users/zsh-syntax-highlighting
-	zgen load zsh-users/zsh-autosuggestions
-	zgen loadall <<EOPLUGINS # bulk load
-EOPLUGINS
-	# ^ can't indent this
-	zgen load zsh-users/zsh-completions src
-	zgen oh-my-zsh themes/robbyrussell
-	zgen save # save all to init script
-fi
-
-######################################################
-##############    settings    ########################
-######################################################
-
 HISTFILE=~/.histfile
 HISTSIZE=10000
 SAVEHIST=$HISTSIZE
@@ -52,13 +24,9 @@ zle -N my-script_widget
 bindkey '^[\t' my-script_widget
 
 # set xfce4-terminal to use 8-bit colors
-if [[ -e /usr/share/terminfo/x/xterm-256color ]] && [[ "$COLORTERM" == "xfce4-terminal" ]]; then
+if [[ -e /usr/share/terminfo/x/xterm-256color ]] && [[ "$COLORTERM" == "truecolor" ]]; then
 	export TERM=xterm-256color
 fi
-
-######################################################
-#######    exports, aliases and functions     ########
-######################################################
 
 export SUDO_EDITOR='/usr/bin/nvim'
 export VISUAL='/usr/bin/nvim'
@@ -72,8 +40,6 @@ export PATH=$HOME/bin:$PATH
 export PATH=$HOME/build/nim-lang-nim/bin:$PATH
 export PATH=$HOME/.nimble/bin:$PATH
 export PATH=$DOTFILES/bin:$PATH
-export PATH=$HOME/.dotnet:$PATH
-export PATH=$HOME/.dotnet/tools:$PATH
 export XDG_DATA_HOME=$HOME
 export LESS=Rx4
 
@@ -81,7 +47,7 @@ alias valgrind-callgrind='/bin/valgrind --tool=callgrind --dump-line=yes --dump-
 alias mmv='noglob zmv -W'
 alias reswap='sudo /bin/swapoff -a && sudo /bin/swapon -a'
 alias ls='/bin/ls --color=auto'
-alias viless='/usr/share/vim/vim81/macros/less.sh'
+alias viless='/usr/share/nvim/runtime/macros/less.sh'
 alias grep='/bin/grep --color=auto'
 alias gret='/bin/git log --all -p | /bin/grep -inI --color=auto --exclude-dir ".*"'
 alias sudo='/bin/sudo '
@@ -117,10 +83,17 @@ fi
 unset __conda_setup
 
 ######################################################
-################    zaw     ##########################
+###########    plugins, themes    ####################
 ######################################################
 
-source $HOME/dotfiles/zaw/zaw.zsh
+export ZPLUGINDIR=$HOME/dotfiles/zsh-plugins
+
+source $ZPLUGINDIR/zsh-autosuggestions/zsh-autosuggestions.zsh
+source $ZPLUGINDIR/zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh
+source $ZPLUGINDIR/zsh-completions/zsh-completions.plugin.zsh
+
+# zaw (Ctrl-R history search)
+source $ZPLUGINDIR/zaw/zaw.zsh
 bindkey "^X" zaw
 bindkey "^R" zaw-history    # Ctrl-R history search
 bindkey "^F" zaw-git-files  # Ctrl-F git file search
@@ -133,3 +106,7 @@ zstyle ':filter-select' max-lines -2
 zstyle ':filter-select' rotate-list yes
 zstyle ':filter-select' case-insensitive yes
 zstyle ':filter-select' hist-find-no-dups yes
+
+# pure them
+source $ZPLUGINDIR/pure/async.zsh
+source $ZPLUGINDIR/pure/pure.zsh
