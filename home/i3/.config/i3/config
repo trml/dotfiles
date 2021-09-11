@@ -32,7 +32,7 @@ font pango:monospace 0
 floating_modifier $a
 
 # start a terminal
-bindsym $a+Return exec lxterminal
+bindsym $a+Return exec kitty
 
 # kill focused window
 bindsym ctrl+Shift+q kill

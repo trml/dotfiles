@@ -1,4 +1,3 @@
-
 " When started as "evim", evim.vim will already have done these settings.
 if v:progname =~? "evim"
   finish
@@ -28,12 +27,8 @@ Plug 'vim-pandoc/vim-pandoc-syntax'
 call plug#end()
 
 set viewoptions=cursor,folds,slash,unix
-" let g:skipview_files = ['*\.vim']
 
 set grepprg=grep\ -nH\ $*
-"let g:tex_flavor = "latex"
-"let g:Tex_DefaultTargetFormat='pdf'
-" set runtimepath=~/.vim,$VIM/vimfiles,$VIMRUNTIME,$VIM/vimfiles/after,~/.vim/after
 
 " allow backspacing over everything in insert mode
 set backspace=indent,eol,start
@@ -42,7 +37,7 @@ set backspace=indent,eol,start
 " These are files we are not likely to want to edit or read.
 set suffixes=.bak,~,.swp,.o,.info,.aux,.log,.dvi,.bbl,.blg,.brf,.cb,.ind,.idx,.ilg,.inx,.out,.toc,.png,.jpg
 
-set history=200 " keep 200 lines of command line history
+set history=5000 " keep 200 lines of command line history
 set ruler " show the cursor position all the time
 set showcmd " display incomplete commands
 set incsearch " do incremental searching
@@ -69,22 +64,19 @@ if !exists(":DiffOrig")
  \ | wincmd p | diffthis
 endif
 
-source /usr/share/vim/vim82/macros/matchit.vim
-set shiftwidth=4
-set tabstop=4
+source /usr/share/nvim/runtime/macros/matchit.vim
+set shiftwidth=2
+set tabstop=2
 set noexpandtab
 set cmdheight=1
-set softtabstop=4
+set softtabstop=2
 
 set listchars=nbsp:█
 
-autocmd Filetype c,cpp,h setlocal ts=4 sw=4 sts=0 noexpandtab cinoptions+=g0 list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
-autocmd Filetype julia,matlab,octave,python,nim,nimrod setlocal ts=4 sw=4 sts=4 expandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
-autocmd Filetype musicxml setlocal ts=2 sw=2 sts=2 expandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
-autocmd Filetype xml setlocal ts=2 sw=2 sts=2 expandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
-autocmd Filetype nim,nimrod setlocal ts=2 sw=2 sts=2 expandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
-"autocmd Filetype c,cpp,h setlocal ts=4 sw=4 sts=0 noexpandtab cinoptions+=g0
-"autocmd Filetype julia,matlab,octave,python,nim,nimrod setlocal ts=4 sw=4 sts=4 expandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
+autocmd Filetype c,cpp,h setlocal ts=4 sw=4 sts=0 noexpandtab cinoptions+=g0
+autocmd Filetype c,cpp,h setlocal ts=4 sw=4 sts=0 noexpandtab cinoptions+=g0 list! listchars=tab:>·,extends:>,precedes:<,trail:¬,nbsp:█
+"autocmd Filetype python setlocal ts=2 sw=2 sts=0 noexpandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
+autocmd Filetype python,musicxml,xml,nim,nimrod,julia,matlab,octave setlocal ts=2 sw=2 sts=2 expandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
 
 syntax enable
 syntax on
@@ -113,8 +105,7 @@ let g:lightline = {
       \ }
 let mapleader = "."
 
-colorscheme NeoSolarized
-set background=dark
+colorscheme ron
 "set background=dark
 
 set backupdir=~/.vim/tmp
