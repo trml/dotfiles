@@ -14,6 +14,8 @@ bindkey -e
 # Use caching so that commands like pacman complete are useable
 zstyle ':completion::complete:*' use-cache 1
 zstyle ':completion::complete:*' cache-path $HOME/.zsh/cache/
+zstyle ':completion:*:*:git:*' script ~/.git-completion.bash
+fpath=($HOME/.zsh $fpath)
 
 # create a zkbd compatible hash;
 # to add other keys to this hash, see: man 5 terminfo
@@ -28,20 +30,16 @@ if [[ -e /usr/share/terminfo/x/xterm-256color ]] && [[ "$COLORTERM" == "truecolo
 	export TERM=xterm-256color
 fi
 
-export SUDO_EDITOR='/usr/bin/nvim'
-export VISUAL='/usr/bin/nvim'
-export EDITOR='/usr/bin/nvim'
-export ZAW_EDITOR='/usr/bin/nvim'
-export SDL_AUDIODRIVER=alsa
+export SUDO_EDITOR='/bin/nvim'
+export VISUAL='/bin/nvim'
+export EDITOR='/bin/nvim'
+export ZAW_EDITOR='/bin/nvim'
+export SDL_AUDIODRIVER=pipewire
 export REPORTTIME=1
-export PATH=/usr/lib:$PATH
-export PATH=/usr/bin:/bin/:$PATH
-export PATH=$HOME/bin:$PATH
-export PATH=$HOME/build/nim-lang-nim/bin:$PATH
-export PATH=$HOME/.nimble/bin:$PATH
 export PATH=$DOTFILES/bin:$PATH
 export XDG_DATA_HOME=$HOME
 export LESS=Rx4
+export PLOTLY_RENDERER="firefox"
 
 alias valgrind-callgrind='/bin/valgrind --tool=callgrind --dump-line=yes --dump-instr=yes --collect-jumps=yes --collect-systime=yes --cache-sim=yes --branch-sim=yes -v --instr-atstart=no'
 alias mmv='noglob zmv -W'
@@ -61,36 +59,40 @@ alias i3lock='i3lock --color=000000'
 alias bam5='$HOME/build/matricks-bam/bam'
 alias vim='nvim'
 alias keyboard='sh $HOME/dotfiles/bin/keyboard.sh'
+alias asan_log='UBSAN_OPTIONS=log_path=./SAN:print_stacktrace=1:halt_on_errors=0 ASAN_OPTIONS=log_path=./SAN:print_stacktrace=1:check_initialization_order=1:detect_leaks=1:halt_on_errors=0'
 
 function grer() {
 /bin/grep -rna --color=always --include "*.*" --exclude="*.o" --exclude="*.a" --exclude="*.dll" --exclude-dir ".*" --exclude-dir="nimcache" ${@} | /bin/cut -c1-400 | less
 }
 
 ######################################################
-#################   conda    #########################
+################    zgen    ##########################
 ######################################################
 
-__conda_setup="$('/opt/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-	eval "$__conda_setup"
-else
-	if [ -f "/opt/miniconda3/etc/profile.d/conda.sh" ]; then
-		. "/opt/miniconda3/etc/profile.d/conda.sh"
-	else
-		export PATH="/opt/miniconda3/bin:$PATH"
-	fi
-fi
-unset __conda_setup
+# load zgen
+source "${HOME}/.zgen/zgen.zsh"
+
+# if the init scipt doesn't exist
+if ! zgen saved; then
+   zgen oh-my-zsh
+   zgen oh-my-zsh plugins/git
+   zgen oh-my-zsh plugins/sudo
+   zgen oh-my-zsh plugins/command-not-found
+   zgen load zsh-users/zsh-syntax-highlighting
+   zgen load zsh-users/zsh-autosuggestions
+   zgen loadall <<EOPLUGINS # bulk load
+EOPLUGINS
+   # ^ can't indent this
+   zgen load zsh-users/zsh-completions src
+   zgen oh-my-zsh themes/robbyrussell
+   zgen save # save all to init script
+ fi
 
 ######################################################
 ###########    plugins, themes    ####################
 ######################################################
 
 export ZPLUGINDIR=$HOME/dotfiles/zsh-plugins
-
-source $ZPLUGINDIR/zsh-autosuggestions/zsh-autosuggestions.zsh
-source $ZPLUGINDIR/zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh
-source $ZPLUGINDIR/zsh-completions/zsh-completions.plugin.zsh
 
 # zaw (Ctrl-R history search)
 source $ZPLUGINDIR/zaw/zaw.zsh
@@ -107,6 +109,18 @@ zstyle ':filter-select' rotate-list yes
 zstyle ':filter-select' case-insensitive yes
 zstyle ':filter-select' hist-find-no-dups yes
 
-# pure them
-source $ZPLUGINDIR/pure/async.zsh
-source $ZPLUGINDIR/pure/pure.zsh
+######################################################
+#################   conda    #########################
+######################################################
+
+export PATH="/opt/miniconda3/bin:$PATH"
+
+__conda_setup="$('/opt/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/opt/miniconda3/etc/profile.d/conda.sh" ]; then
+        . "/opt/miniconda3/etc/profile.d/conda.sh"
+    fi
+fi
+unset __conda_setup
