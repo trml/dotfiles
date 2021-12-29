@@ -18,15 +18,11 @@ _STOWHOME=$(CURDIR)/home/
 _TARGETROOT=/
 _STOWROOT=$(CURDIR)/root/
 
-./antigen/antigen.zsh:
-	git submodule update --init --recursive
-./zaw/zaw.zsh:
-	git submodule update --init --recursive
-
 _post-install:
 	@echo "The target files will be adopted by stow but not commited. Use 'git diff' to see the changes, 'git commit' to keep the original files, 'git checkout HEAD' to overwrite the old files."
 
-install-home: antigen/antigen.zsh zaw/zaw.zsh _post-install
+install-home: _post-install
+	git submodule update --init --recursive
 ifneq ($(SUDO_COMMAND),)
 	@echo "This command must be run without sudo."
 else

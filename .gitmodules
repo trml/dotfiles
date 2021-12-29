@@ -10,9 +10,3 @@
 [submodule "zsh-plugins/zaw"]
 	path = zsh-plugins/zaw
 	url = https://github.com/zsh-users/zaw
-[submodule "zsh-plugins/pure"]
-	path = zsh-plugins/pure
-	url = https://github.com/sindresorhus/pure
-[submodule "zsh-plugins/zgen"]
-	path = zsh-plugins/zgen
-	url = https://github.com/tarjoilija/zgen

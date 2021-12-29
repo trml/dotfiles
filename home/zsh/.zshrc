@@ -66,33 +66,17 @@ function grer() {
 }
 
 ######################################################
-################    zgen    ##########################
-######################################################
-
-# load zgen
-source "${HOME}/.zgen/zgen.zsh"
-
-# if the init scipt doesn't exist
-if ! zgen saved; then
-   zgen oh-my-zsh
-   zgen oh-my-zsh plugins/git
-   zgen oh-my-zsh plugins/sudo
-   zgen oh-my-zsh plugins/command-not-found
-   zgen load zsh-users/zsh-syntax-highlighting
-   zgen load zsh-users/zsh-autosuggestions
-   zgen loadall <<EOPLUGINS # bulk load
-EOPLUGINS
-   # ^ can't indent this
-   zgen load zsh-users/zsh-completions src
-   zgen oh-my-zsh themes/robbyrussell
-   zgen save # save all to init script
- fi
-
-######################################################
-###########    plugins, themes    ####################
+########     plugins, themes/prompt      #############
 ######################################################
 
 export ZPLUGINDIR=$HOME/dotfiles/zsh-plugins
+
+PROMPT='%n %F{cyan}%2~ %F{red}$(git branch 2>/dev/null | grep "\*" | awk '\''{print $NF }'\'' | sed "s/[* )]//g")%F{3}✗ %f'
+setopt prompt_subst
+
+source $ZPLUGINDIR/zsh-completions/zsh-completions.plugin.zsh
+source $ZPLUGINDIR/zsh-autosuggestions/zsh-autosuggestions.zsh
+source $ZPLUGINDIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh # must be sourced last
 
 # zaw (Ctrl-R history search)
 source $ZPLUGINDIR/zaw/zaw.zsh
