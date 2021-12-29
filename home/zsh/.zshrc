@@ -46,8 +46,6 @@ alias mmv='noglob zmv -W'
 alias reswap='sudo /bin/swapoff -a && sudo /bin/swapon -a'
 alias ls='/bin/ls --color=auto'
 alias viless='/usr/share/nvim/runtime/macros/less.sh'
-alias grep='/bin/grep --color=auto'
-alias gret='/bin/git log --all -p | /bin/grep -inI --color=auto --exclude-dir ".*"'
 alias sudo='/bin/sudo '
 alias updatedb='/usr/bin/updatedb --require-visibility 0 -o $HOME/.locate.db'
 alias locate='/usr/bin/locate --database=$HOME/.locate.db'
@@ -61,8 +59,14 @@ alias vim='nvim'
 alias keyboard='sh $HOME/dotfiles/bin/keyboard.sh'
 alias asan_log='UBSAN_OPTIONS=log_path=./SAN:print_stacktrace=1:halt_on_errors=0 ASAN_OPTIONS=log_path=./SAN:print_stacktrace=1:check_initialization_order=1:detect_leaks=1:halt_on_errors=0'
 
+alias grep='/bin/grep --color=auto'
+
+function gret() {
+	/bin/git log --all -p | /bin/grep -inI --color=auto --exclude-dir ".*"
+}
+
 function grer() {
-/bin/grep -rna --color=always --include "*.*" --exclude="*.o" --exclude="*.a" --exclude="*.dll" --exclude-dir ".*" --exclude-dir="nimcache" ${@} | /bin/cut -c1-400 | less
+	/bin/grep -rna --color=always --include "*.*" --exclude="*.o" --exclude="*.a" --exclude="*.dll" --exclude-dir ".*" --exclude-dir="nimcache" ${@} | /bin/cut -c1-400 | less
 }
 
 ######################################################
@@ -71,14 +75,14 @@ function grer() {
 
 export ZPLUGINDIR=$HOME/dotfiles/zsh-plugins
 
-PROMPT='%n %F{cyan}%2~ %F{red}$(git branch 2>/dev/null | grep "\*" | awk '\''{print $NF }'\'' | sed "s/[* )]//g")%F{3}✗ %f'
+PROMPT='%F{cyan}%2~%F{red}$(git branch 2>/dev/null | grep "\*" | awk '\''{print " " $NF }'\'' | sed "s/)//g")%F{3}> %f'
 setopt prompt_subst
 
 source $ZPLUGINDIR/zsh-completions/zsh-completions.plugin.zsh
 source $ZPLUGINDIR/zsh-autosuggestions/zsh-autosuggestions.zsh
 source $ZPLUGINDIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh # must be sourced last
 
-# zaw (Ctrl-R history search)
+# zaw (Ctrl-R history search, etc)
 source $ZPLUGINDIR/zaw/zaw.zsh
 bindkey "^X" zaw
 bindkey "^R" zaw-history    # Ctrl-R history search
