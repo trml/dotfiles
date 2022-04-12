@@ -58,15 +58,15 @@ alias bam5='$HOME/build/matricks-bam/bam'
 alias vim='nvim'
 alias keyboard='sh $HOME/dotfiles/bin/keyboard.sh'
 alias asan_log='UBSAN_OPTIONS=log_path=./SAN:print_stacktrace=1:halt_on_errors=0 ASAN_OPTIONS=log_path=./SAN:print_stacktrace=1:check_initialization_order=1:detect_leaks=1:halt_on_errors=0'
-
 alias grep='/bin/grep --color=auto'
+alias ddnet='$HOME/build/trml-ddnet/Release/DDNet'
 
 function gret() {
 	/bin/git log --all -p | /bin/grep -inI --color=auto --exclude-dir ".*"
 }
 
 function grer() {
-	/bin/grep -rna --color=always --include "*.*" --exclude="*.o" --exclude="*.a" --exclude="*.dll" --exclude-dir ".*" --exclude-dir="nimcache" ${@} | /bin/cut -c1-400 | less
+	/bin/grep -rna --color=always --include "*.*" --exclude="*.o" --exclude="*.a" --exclude="*.dll" --exclude-dir ".*[\.]" --exclude-dir="nimcache" ${@} | /bin/cut -c1-400 | less
 }
 
 ######################################################

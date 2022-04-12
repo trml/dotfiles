@@ -3,9 +3,10 @@ if v:progname =~? "evim"
   finish
 endif
 
-" Use Vim settings, rather than Vi settings (much better!).
-" This must be first, because it changes other options as a side effect.
+" Use Vim settings, rather than Vi settings (much better!). This must be first, because it changes other options as a side effect.
 set nocompatible
+
+"------------ Plugins ------------
 
 let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
 if empty(glob(data_dir . '/autoload/plug.vim'))
@@ -13,18 +14,24 @@ if empty(glob(data_dir . '/autoload/plug.vim'))
   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 call plug#begin('~/.vim/plugged')
+
 Plug 'vim-scripts/restore_view.vim'
 Plug 'scrooloose/nerdcommenter'
-Plug 'JuliaLang/julia-vim'
 "Plug 'tpope/vim-fugitive'
-"Plug 'altercation/vim-colors-solarized'
+
+" Languages and syntax
+Plug 'JuliaLang/julia-vim'
 Plug 'zah/nim.vim'
-Plug 'iCyMind/NeoSolarized'
 Plug 'wlangstroth/vim-racket'
-Plug 'jpalardy/vim-slime'
 Plug 'vim-pandoc/vim-pandoc'
 Plug 'vim-pandoc/vim-pandoc-syntax'
+
+" Themes
+Plug 'srcery-colors/srcery-vim'
+
 call plug#end()
+
+"------------ Variuos ------------
 
 set viewoptions=cursor,folds,slash,unix
 
@@ -104,8 +111,10 @@ let g:lightline = {
       \ }
 let mapleader = "."
 
+set termguicolors
+
 colorscheme ron
-"set background=dark
+set background=dark
 
 set backupdir=~/.vim/tmp
 set directory=~/.vim/tmp
