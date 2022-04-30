@@ -17,6 +17,7 @@ call plug#begin('~/.vim/plugged')
 
 Plug 'vim-scripts/restore_view.vim'
 Plug 'scrooloose/nerdcommenter'
+Plug 'norcalli/nvim-colorizer.lua'
 "Plug 'tpope/vim-fugitive'
 
 " Languages and syntax
@@ -27,11 +28,17 @@ Plug 'vim-pandoc/vim-pandoc'
 Plug 'vim-pandoc/vim-pandoc-syntax'
 
 " Themes
+Plug 'nanotech/jellybeans.vim'
+Plug 'trml/vim-fahrenheit'
 Plug 'srcery-colors/srcery-vim'
+Plug 'danilo-augusto/vim-afterglow'
 
 call plug#end()
 
 "------------ Variuos ------------
+
+set termguicolors
+lua require'colorizer'.setup()
 
 set viewoptions=cursor,folds,slash,unix
 
@@ -111,10 +118,8 @@ let g:lightline = {
       \ }
 let mapleader = "."
 
-set termguicolors
-
-colorscheme ron
-set background=dark
+colorscheme fahrenheit
+"set background=dark
 
 set backupdir=~/.vim/tmp
 set directory=~/.vim/tmp
