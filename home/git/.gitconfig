@@ -1,9 +1,6 @@
 [alias]
-	co = checkout
-	ci = comitt
-	st = status
-	br = branch
-	hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
+	hist = log --pretty=format:'%C(yellow)%h %C(cyan)%ad %C(reset)| %s%d %C(green)[%an]' --abbrev=11 --date=short --graph --no-merges
+	branches = for-each-ref --sort='-authordate:iso8601' --count=35 --format=' %(color:cyan)%(authordate:relative)%09%(color:white)%(refname:short)' refs/heads
 	type = cat-file -t
 	dump = cat-file -p
 [push]

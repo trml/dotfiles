@@ -11,6 +11,16 @@ setopt completealiases
 unsetopt beep notify
 bindkey -e
 
+#setxkbmap -layout us -variant altgr-intl -option caps:escape -option nbsp:none
+setxkbmap -layout no -option caps:escape -option nbsp:none
+
+# make really sure there is no non breaking space
+xmodmap -e 'keycode 0x09 = bar NoSymbol Escape NoSymbol Escape'
+
+# bind altgr+comma/period to < and >
+xmodmap -e 'keycode 0x3b = comma semicolon comma semicolon less dead_ogonek dead_cedilla'
+xmodmap -e 'keycode 0x3c = period colon period colon greater periodcentered ellipsis'
+
 # Use caching so that commands like pacman complete are useable
 zstyle ':completion::complete:*' use-cache 1
 zstyle ':completion::complete:*' cache-path $HOME/.zsh/cache/
@@ -28,6 +38,11 @@ bindkey '^[\t' my-script_widget
 # set xfce4-terminal to use 8-bit colors
 if [[ -e /usr/share/terminfo/x/xterm-256color ]] && [[ "$COLORTERM" == "truecolor" ]]; then
 	export TERM=xterm-256color
+fi
+
+if [ -n "$DESKTOP_SESSION" ];then
+    eval $(gnome-keyring-daemon --start)
+    export SSH_AUTH_SOCK
 fi
 
 export SUDO_EDITOR='/bin/nvim'
@@ -59,7 +74,7 @@ alias vim='nvim'
 alias keyboard='sh $HOME/dotfiles/bin/keyboard.sh'
 alias asan_log='UBSAN_OPTIONS=log_path=./SAN:print_stacktrace=1:halt_on_errors=0 ASAN_OPTIONS=log_path=./SAN:print_stacktrace=1:check_initialization_order=1:detect_leaks=1:halt_on_errors=0'
 alias grep='/bin/grep --color=auto'
-alias ddnet='$HOME/build/trml-ddnet/Release/DDNet'
+alias ddnet='~/build/trml-ddnet/Release/DDNet'
 
 function gret() {
 	/bin/git log --all -p | /bin/grep -inI --color=auto --exclude-dir ".*"
