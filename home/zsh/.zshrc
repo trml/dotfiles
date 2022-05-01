@@ -1,4 +1,4 @@
-HISTFILE=~/.histfile
+HISTFILE=$HOME/.histfile
 HISTSIZE=10000
 SAVEHIST=$HISTSIZE
 setopt hist_ignore_all_dups
@@ -11,50 +11,17 @@ setopt completealiases
 unsetopt beep notify
 bindkey -e
 
-#setxkbmap -layout us -variant altgr-intl -option caps:escape -option nbsp:none
-setxkbmap -layout no -option caps:escape -option nbsp:none
-
-# make really sure there is no non breaking space
-xmodmap -e 'keycode 0x09 = bar NoSymbol Escape NoSymbol Escape'
-
-# bind altgr+comma/period to < and >
-xmodmap -e 'keycode 0x3b = comma semicolon comma semicolon less dead_ogonek dead_cedilla'
-xmodmap -e 'keycode 0x3c = period colon period colon greater periodcentered ellipsis'
-
-# Use caching so that commands like pacman complete are useable
-zstyle ':completion::complete:*' use-cache 1
-zstyle ':completion::complete:*' cache-path $HOME/.zsh/cache/
-zstyle ':completion:*:*:git:*' script ~/.git-completion.bash
-fpath=($HOME/.zsh $fpath)
-
-# create a zkbd compatible hash;
-# to add other keys to this hash, see: man 5 terminfo
-typeset -A key
-
-my-script_widget() tmux next-window
-zle -N my-script_widget
-bindkey '^[\t' my-script_widget
-
-# set xfce4-terminal to use 8-bit colors
-if [[ -e /usr/share/terminfo/x/xterm-256color ]] && [[ "$COLORTERM" == "truecolor" ]]; then
-	export TERM=xterm-256color
-fi
-
-if [ -n "$DESKTOP_SESSION" ];then
-    eval $(gnome-keyring-daemon --start)
-    export SSH_AUTH_SOCK
-fi
-
 export SUDO_EDITOR='/bin/nvim'
 export VISUAL='/bin/nvim'
 export EDITOR='/bin/nvim'
 export ZAW_EDITOR='/bin/nvim'
 export SDL_AUDIODRIVER=pipewire
 export REPORTTIME=1
-export PATH=$DOTFILES/bin:$PATH
 export XDG_DATA_HOME=$HOME
 export LESS=Rx4
 export PLOTLY_RENDERER="firefox"
+
+export PATH="$HOME/dotfiles/bin:$PATH"
 
 alias valgrind-callgrind='/bin/valgrind --tool=callgrind --dump-line=yes --dump-instr=yes --collect-jumps=yes --collect-systime=yes --cache-sim=yes --branch-sim=yes -v --instr-atstart=no'
 alias mmv='noglob zmv -W'
@@ -71,10 +38,9 @@ alias connectedscreen='$(xrandr -q | grep " connected" | awk "{print $1}" | head
 alias i3lock='i3lock --color=000000'
 alias bam5='$HOME/build/matricks-bam/bam'
 alias vim='nvim'
-alias keyboard='sh $HOME/dotfiles/bin/keyboard.sh'
 alias asan_log='UBSAN_OPTIONS=log_path=./SAN:print_stacktrace=1:halt_on_errors=0 ASAN_OPTIONS=log_path=./SAN:print_stacktrace=1:check_initialization_order=1:detect_leaks=1:halt_on_errors=0'
 alias grep='/bin/grep --color=auto'
-alias ddnet='~/build/trml-ddnet/Release/DDNet'
+alias ddnet='$HOME/build/trml-ddnet/Release/DDNet'
 
 function gret() {
 	/bin/git log --all -p | /bin/grep -inI --color=auto --exclude-dir ".*"
@@ -84,21 +50,53 @@ function grer() {
 	/bin/grep -rna --color=always --include "*.*" --exclude="*.o" --exclude="*.a" --exclude="*.dll" --exclude-dir ".*[\.]" --exclude-dir="nimcache" ${@} | /bin/cut -c1-400 | less
 }
 
-######################################################
-########     plugins, themes/prompt      #############
-######################################################
+my-script_widget() tmux next-window
+zle -N my-script_widget
+bindkey '^[\t' my-script_widget
+
+# set xfce4-terminal to use 8-bit colors
+if [[ -e /usr/share/terminfo/x/xterm-256color ]] && [[ "$COLORTERM" == "truecolor" ]]; then
+	export TERM=xterm-256color
+fi
+
+if [ -n "$DESKTOP_SESSION" ];then
+    eval $(gnome-keyring-daemon --start)
+    export SSH_AUTH_SOCK
+fi
+
+###############################################################
+####################    keyboard    ###########################
+###############################################################
+
+setxkbmap -layout no -option caps:escape -option nbsp:none
+#setxkbmap -layout us -variant altgr-intl -option caps:escape -option nbsp:none
+#xmodmap -e 'keycode 0x09 = bar NoSymbol Escape NoSymbol Escape'
+
+# bind altgr+comma/period to < and >
+xmodmap -e 'keycode 0x3b = comma semicolon comma semicolon less dead_ogonek dead_cedilla'
+xmodmap -e 'keycode 0x3c = period colon period colon greater periodcentered ellipsis'
+
+typeset -A key
+
+######################################################################
+##########     plugins, themes/prompt, completion      ###############
+######################################################################
 
 export ZPLUGINDIR=$HOME/dotfiles/zsh-plugins
 
 PROMPT='%F{cyan}%2~%F{red}$(git branch 2>/dev/null | grep "\*" | awk '\''{print " " $NF }'\'' | sed "s/)//g")%F{3}> %f'
 setopt prompt_subst
 
-source $ZPLUGINDIR/zsh-completions/zsh-completions.plugin.zsh
-source $ZPLUGINDIR/zsh-autosuggestions/zsh-autosuggestions.zsh
-source $ZPLUGINDIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh # must be sourced last
+fpath=($ZPLUGINDIR/zsh-completions/zsh-completions.plugin.zsh $fpath)
+fpath=($ZPLUGINDIR/zsh-autosuggestions/zsh-autosuggestions.zsh $fpath)
+fpath=($ZPLUGINDIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh $fpath) # must be sourced last
+#source $ZPLUGINDIR/zsh-completions/zsh-completions.plugin.zsh
+#source $ZPLUGINDIR/zsh-autosuggestions/zsh-autosuggestions.zsh
+#source $ZPLUGINDIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh # must be sourced last
 
 # zaw (Ctrl-R history search, etc)
 source $ZPLUGINDIR/zaw/zaw.zsh
+
 bindkey "^X" zaw
 bindkey "^R" zaw-history    # Ctrl-R history search
 bindkey "^F" zaw-git-files  # Ctrl-F git file search
@@ -112,18 +110,30 @@ zstyle ':filter-select' rotate-list yes
 zstyle ':filter-select' case-insensitive yes
 zstyle ':filter-select' hist-find-no-dups yes
 
-######################################################
-#################   conda    #########################
-######################################################
+# enable completion
+zstyle ':completion:*' completer _expand _complete _ignored _correct
+zstyle :compinstall filename '/home/s/.zshrc'
+autoload -Uz compinit
+compinit
+
+# Use caching so that commands like pacman complete are useable
+zstyle ':completion::complete:*' use-cache 1
+zstyle ':completion::complete:*' cache-path $HOME/.zsh/cache/
+zstyle ':completion:*:*:git:*' script $HOME/.git-completion.bash
+fpath=($HOME/.zsh $fpath)
+
+###########################################################
+####################   conda    ###########################
+###########################################################
 
 export PATH="/opt/miniconda3/bin:$PATH"
 
 __conda_setup="$('/opt/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
 if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
+		eval "$__conda_setup"
 else
-    if [ -f "/opt/miniconda3/etc/profile.d/conda.sh" ]; then
-        . "/opt/miniconda3/etc/profile.d/conda.sh"
-    fi
+		if [ -f "/opt/miniconda3/etc/profile.d/conda.sh" ]; then
+				. "/opt/miniconda3/etc/profile.d/conda.sh"
+		fi
 fi
 unset __conda_setup
