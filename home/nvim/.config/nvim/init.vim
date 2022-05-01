@@ -118,7 +118,7 @@ let g:lightline = {
       \ }
 let mapleader = "."
 
-colorscheme fahrenheit
+colorscheme colorscheme_test
 "set background=dark
 
 set backupdir=~/.vim/tmp
