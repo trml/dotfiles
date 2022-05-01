@@ -50,6 +50,19 @@ function grer() {
 	/bin/grep -rna --color=always --include "*.*" --exclude="*.o" --exclude="*.a" --exclude="*.dll" --exclude-dir ".*[\.]" --exclude-dir="nimcache" ${@} | /bin/cut -c1-400 | less
 }
 
+# enable completion
+zstyle ':completion:*' completer _expand _complete _ignored _correct rehash true
+zstyle :compinstall filename '/home/s/.zshrc'
+autoload -Uz compinit promptinit
+compinit
+promptinit
+
+# Use caching so that commands like pacman complete are useable
+zstyle ':completion::complete:*' use-cache 1
+zstyle ':completion::complete:*' cache-path $HOME/.zsh/cache/
+zstyle ':completion:*:*:git:*' script $HOME/.git-completion.bash
+fpath=($HOME/.zsh $fpath)
+
 my-script_widget() tmux next-window
 zle -N my-script_widget
 bindkey '^[\t' my-script_widget
@@ -78,21 +91,18 @@ xmodmap -e 'keycode 0x3c = period colon period colon greater periodcentered elli
 
 typeset -A key
 
-######################################################################
-##########     plugins, themes/prompt, completion      ###############
-######################################################################
+##############################################################
+##########       plugins, themes/prompt        ###############
+##############################################################
 
 export ZPLUGINDIR=$HOME/dotfiles/zsh-plugins
 
 PROMPT='%F{cyan}%2~%F{red}$(git branch 2>/dev/null | grep "\*" | awk '\''{print " " $NF }'\'' | sed "s/)//g")%F{3}> %f'
 setopt prompt_subst
 
-fpath=($ZPLUGINDIR/zsh-completions/zsh-completions.plugin.zsh $fpath)
-fpath=($ZPLUGINDIR/zsh-autosuggestions/zsh-autosuggestions.zsh $fpath)
-fpath=($ZPLUGINDIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh $fpath) # must be sourced last
-#source $ZPLUGINDIR/zsh-completions/zsh-completions.plugin.zsh
-#source $ZPLUGINDIR/zsh-autosuggestions/zsh-autosuggestions.zsh
-#source $ZPLUGINDIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh # must be sourced last
+source $ZPLUGINDIR/zsh-completions/zsh-completions.plugin.zsh
+source $ZPLUGINDIR/zsh-autosuggestions/zsh-autosuggestions.zsh
+source $ZPLUGINDIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 # zaw (Ctrl-R history search, etc)
 source $ZPLUGINDIR/zaw/zaw.zsh
@@ -109,18 +119,6 @@ zstyle ':filter-select' max-lines -2
 zstyle ':filter-select' rotate-list yes
 zstyle ':filter-select' case-insensitive yes
 zstyle ':filter-select' hist-find-no-dups yes
-
-# enable completion
-zstyle ':completion:*' completer _expand _complete _ignored _correct
-zstyle :compinstall filename '/home/s/.zshrc'
-autoload -Uz compinit
-compinit
-
-# Use caching so that commands like pacman complete are useable
-zstyle ':completion::complete:*' use-cache 1
-zstyle ':completion::complete:*' cache-path $HOME/.zsh/cache/
-zstyle ':completion:*:*:git:*' script $HOME/.git-completion.bash
-fpath=($HOME/.zsh $fpath)
 
 ###########################################################
 ####################   conda    ###########################
