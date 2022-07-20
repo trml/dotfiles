@@ -86,10 +86,11 @@ set cmdheight=1
 set softtabstop=2
 set listchars=nbsp:█
 
-autocmd Filetype c,cpp,h setlocal ts=4 sw=4 sts=0 noexpandtab cinoptions+=g0
-autocmd Filetype c,cpp,h setlocal ts=4 sw=4 sts=0 noexpandtab cinoptions+=g0 list! listchars=tab:>·,extends:>,precedes:<,trail:¬,nbsp:█
+"autocmd Filetype c,cpp,h setlocal ts=4 sw=4 sts=0 noexpandtab cinoptions+=g0
 "autocmd Filetype python setlocal ts=2 sw=2 sts=0 noexpandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
+autocmd Filetype c,cpp,h setlocal ts=4 sw=4 sts=0 noexpandtab cinoptions+=g0 list! listchars=tab:>·,extends:>,precedes:<,trail:¬,nbsp:█
 autocmd Filetype python,musicxml,xml,nim,nimrod,julia,matlab,octave setlocal ts=2 sw=2 sts=2 expandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
+autocmd Filetype rust,rs setlocal ts=2 sw=2 sts=0 noexpandtab cinoptions+=g0
 
 syntax enable
 syntax on

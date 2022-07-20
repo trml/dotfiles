@@ -85,9 +85,9 @@ bindsym $a+f fullscreen toggle
 bindsym $a+g fullscreen toggle global
 
 # change container layout (stacked, tabbed, toggle split)
-bindsym $a+s layout stacking
-bindsym $a+w layout tabbed
-bindsym $a+e layout toggle split
+#bindsym $a+s layout stacking
+#bindsym $a+w layout tabbed
+#bindsym $a+e layout toggle split
 
 # toggle tiling / floating
 bindsym $a+space floating toggle
@@ -229,7 +229,7 @@ bindsym $a+$mod+l exec --no-startup-id $Locker, mode "default"
 # finds out, if available)
 bar {
 	status_command i3status
-	font pango:Droid Sans Mono 14
+	font pango:Source Code Pro 14
 	colors {
 		background #002b36
 		statusline #93a1a1

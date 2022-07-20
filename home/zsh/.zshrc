@@ -22,6 +22,7 @@ export LESS=Rx4
 export PLOTLY_RENDERER="firefox"
 
 export PATH="$HOME/dotfiles/bin:$PATH"
+export QT_AUTO_SCREEN_SCALE_FACTOR=1 # make qt use .Xresources dpi setting
 
 alias valgrind-callgrind='/bin/valgrind --tool=callgrind --dump-line=yes --dump-instr=yes --collect-jumps=yes --collect-systime=yes --cache-sim=yes --branch-sim=yes -v --instr-atstart=no'
 alias mmv='noglob zmv -W'
@@ -47,7 +48,7 @@ function gret() {
 }
 
 function grer() {
-	/bin/grep -rna --color=always --include "*.*" --exclude="*.o" --exclude="*.a" --exclude="*.dll" --exclude-dir ".*[\.]" --exclude-dir="nimcache" ${@} | /bin/cut -c1-400 | less
+	/bin/grep -rna --color=always --include "*.*" --exclude="*.o" --exclude="*.a" --exclude="*.dll" --exclude="*.pyc" --exclude-dir ".*[\.]" --exclude-dir="nimcache" ${@} | /bin/cut -c1-400 | less
 }
 
 # enable completion
