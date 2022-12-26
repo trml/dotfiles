@@ -74,7 +74,7 @@ if [[ -e /usr/share/terminfo/x/xterm-256color ]] && [[ "$COLORTERM" == "truecolo
 fi
 
 if [ -n "$DESKTOP_SESSION" ];then
-    eval $(gnome-keyring-daemon --start)
+    #eval $(gnome-keyring-daemon --start)
     export SSH_AUTH_SOCK
 fi
 
@@ -82,7 +82,7 @@ fi
 ####################    keyboard    ###########################
 ###############################################################
 
-setxkbmap -layout no -option caps:escape -option nbsp:none
+#setxkbmap -layout no -option caps:escape -option nbsp:none
 #setxkbmap -layout us -variant altgr-intl -option caps:escape -option nbsp:none
 #xmodmap -e 'keycode 0x09 = bar NoSymbol Escape NoSymbol Escape'
 
