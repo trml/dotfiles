@@ -82,14 +82,6 @@ fi
 ####################    keyboard    ###########################
 ###############################################################
 
-#setxkbmap -layout no -option caps:escape -option nbsp:none
-#setxkbmap -layout us -variant altgr-intl -option caps:escape -option nbsp:none
-#xmodmap -e 'keycode 0x09 = bar NoSymbol Escape NoSymbol Escape'
-
-# bind altgr+comma/period to < and >
-xmodmap -e 'keycode 0x3b = comma semicolon comma semicolon less dead_ogonek dead_cedilla'
-xmodmap -e 'keycode 0x3c = period colon period colon greater periodcentered ellipsis'
-
 typeset -A key
 
 ##############################################################

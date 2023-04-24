@@ -1,12 +1,14 @@
 [alias]
 	hist = log --pretty=format:'%C(yellow)%h %C(cyan)%ad %C(reset)| %s%d %C(green)[%an]' --abbrev=11 --date=short --graph --no-merges
 	branches = for-each-ref --sort='-authordate:iso8601' --count=35 --format=' %(color:cyan)%(authordate:relative)%09%(color:white)%(refname:short)' refs/heads
-	type = cat-file -t
-	dump = cat-file -p
 [push]
 	default = simple
+[color]
+	diff = always
 [core]
-	pager = less -+F -+X
+	pager = less --tabs=4
+[pager]
+	diff = git diff --color-words | less --tabs=4 ; piping git diff to git diff to get --color-words
 [user]
 	name = trml
 	email = trml@users.noreply.github.com

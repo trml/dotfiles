@@ -25,7 +25,6 @@
     "modules-right": [],
     "controls-settings": {
       "components": [
-        "brightness",
         "volume",
         "battery",
         "net",
@@ -45,7 +44,7 @@
       "leave-closes": true,
       "click-closes": false,
       "css-name": "controls-window",
-      "net-interface": "",
+      "net-interface": "wlan0",
       "custom-items": [
         {
           "name": "Panel settings",
@@ -82,7 +81,10 @@
       "window-margin-horizontal": 0,
       "window-margin-vertical": 0,
       "root-css-name": "controls-overview",
-      "angle": 0.0
+      "angle": 0.0,
+      "battery-low-level": 20,
+      "battery-low-interval": 3,
+      "processes-label": "Processes"
     },
     "tray": {
       "root-css-name": "tray",
@@ -99,18 +101,20 @@
         "7",
         "8"
       ],
-      "name-max-len": 20,
+			"format": "{name} {name}",
+      "name-max-len": 10,
       "image-size": 16,
       "workspaces-spacing": 0,
       "task-padding": 0,
       "show-app-icon": true,
-      "show-app-name": true,
-      "show-layout": true,
+      "show-app-name": false,
+      "show-layout": false,
       "workspace-buttons": false,
-      "all-workspaces": true,
-      "mark-autotiling": true,
-      "mark-xwayland": true,
-      "all-outputs": true
+      "all-workspaces": false,
+      "mark-autotiling": false,
+      "mark-xwayland": false,
+      "all-outputs": false,
+			"disable-scroll": true
     },
     "sway-workspaces": {
       "numbers": [
@@ -157,6 +161,7 @@
     "scratchpad": {},
     "openweather": {},
     "brightness-slider": {},
-    "dwl-tags": {}
+    "dwl-tags": {},
+    "hyprland-taskbar": {}
   }
 ]
