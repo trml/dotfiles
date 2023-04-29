@@ -10,7 +10,7 @@ set nocompatible
 
 let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
 if empty(glob(data_dir . '/autoload/plug.vim'))
-  silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+	silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 call plug#begin('~/.vim/plugged')
@@ -29,7 +29,6 @@ Plug 'vim-pandoc/vim-pandoc-syntax'
 
 " Themes
 Plug 'nanotech/jellybeans.vim'
-Plug 'trml/vim-fahrenheit'
 Plug 'srcery-colors/srcery-vim'
 Plug 'danilo-augusto/vim-afterglow'
 
@@ -38,7 +37,9 @@ call plug#end()
 "------------ Variuos ------------
 
 set termguicolors
-lua require'colorizer'.setup()
+if has('nvim')
+	lua require'colorizer'.setup()
+endif
 
 set viewoptions=cursor,folds,slash,unix
 
@@ -81,19 +82,21 @@ endif
 source /usr/share/nvim/runtime/macros/matchit.vim
 set shiftwidth=2
 set tabstop=2
+set softtabstop=2
 set noexpandtab
 set cmdheight=1
-set softtabstop=2
 set listchars=nbsp:█
 
-"autocmd Filetype c,cpp,h setlocal ts=4 sw=4 sts=0 noexpandtab cinoptions+=g0
-"autocmd Filetype python setlocal ts=2 sw=2 sts=0 noexpandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
-autocmd Filetype c,cpp,h setlocal ts=4 sw=4 sts=0 noexpandtab cinoptions+=g0 list! listchars=tab:>·,extends:>,precedes:<,trail:¬,nbsp:█
-autocmd Filetype python,musicxml,xml,nim,nimrod,julia,matlab,octave setlocal ts=2 sw=2 sts=2 expandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
-autocmd Filetype rust,rs setlocal ts=2 sw=2 sts=0 noexpandtab cinoptions+=g0
+"autocmd Filetype c,cpp,h,hpp setlocal ts=4 sw=4 sts=0 noexpandtab cinoptions+=g0
+autocmd Filetype c,cpp,h,hpp setlocal ts=4 sw=4 sts=0 noexpandtab cinoptions+=g0 list! listchars=tab:>·,extends:>,precedes:<,trail:¬,nbsp:█
+autocmd Filetype rust,rs setlocal ts=2 sw=2 sts=0 noexpandtab cinoptions+=g0 list! listchars=tab:>·,extends:>,precedes:<,trail:¬,nbsp:█
+autocmd Filetype python,musicxml,xml,nim,nimrod,julia,matlab,octave setlocal ts=2 sw=2 sts=0 noexpandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
 
 syntax enable
 syntax on
+
+"autocmd filetype c nnoremap <F4> :w <bar> exec '!gcc '.shellescape('%').' -o '.shellescape('%:r').' && ./'.shellescape('%:r')<CR>
+autocmd filetype tex nnoremap <F5> :w <bar> exec '!bibtex '.shellescape('%:r').' && !pdflatex '.shellescape('%:r')<CR>
 
 set clipboard^=unnamedplus
 set pastetoggle=<F10>
@@ -120,13 +123,11 @@ let g:lightline = {
 let mapleader = "."
 
 colorscheme colorscheme_test
+"colorscheme ron
 "set background=dark
 
 set backupdir=~/.vim/tmp
 set directory=~/.vim/tmp
-
-"autocmd filetype c nnoremap <F4> :w <bar> exec '!gcc '.shellescape('%').' -o '.shellescape('%:r').' && ./'.shellescape('%:r')<CR>
-autocmd filetype tex nnoremap <F5> :w <bar> exec '!bibtex '.shellescape('%:r').' && !pdflatex '.shellescape('%:r')<CR>
 
 set exrc
 set secure

@@ -6,9 +6,23 @@
 [color]
 	diff = always
 [core]
-	pager = less --tabs=4
-[pager]
-	diff = git diff --color-words | less --tabs=4 ; piping git diff to git diff to get --color-words
+	;pager = less --tabs=4
+	pager = diff-so-fancy | less --tabs=4
+[diff]
+	wsErrorHighlight = all
+[color "diff"]
+	whitespace = "red reverse"
+;[pager]
+	;diff = git diff --color-words | less -R --tabs=4 ; piping git diff to git diff to get --color-words
+	;diff = git diff --color-words='[^[:space:]_]+|[^[:space:]]_[:space:]]+|[[:space:]+]' --word-diff=plain | less -R --tabs=4 ; piping git diff to git diff to get --color-words
+	;diff = git diff --color-words='[^[:space:]+]+|:space:*' | less -R --tabs=4 ; piping git diff to git diff to get --color-words
+	;diff = git diff --color-words='.*' | less -R --tabs=4 ; piping git diff to git diff to get --color-words
+[color]
+	diff = auto
+	ui = auto
+[diff-so-fancy]
+	useUnicodeRuler = false
+	rulerWidth = 47
 [user]
 	name = trml
 	email = trml@users.noreply.github.com

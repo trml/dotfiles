@@ -1,6 +1,7 @@
 ### Variables
 # Logo key. Use Mod1 for Alt.
 set $mod Mod4
+set $alt Mod1
 # Home row direction keys, like vim
 set $left h
 set $down j
@@ -11,11 +12,6 @@ set $term kitty
 
 #set $menu dmenu_path | dmenu | xargs swaymsg exec --
 set $menu wofi --show run | xargs swaymsg exec
-
-### Various
-default_border pixel 1
-default_floating_border pixel 2
-focus_follows_mouse no
 
 ### Output configuration
 # Example configuration:
@@ -51,6 +47,7 @@ input type:keyboard {
 
     # Kill focused window
     bindsym $mod+Shift+q kill
+    bindsym $alt+F4 kill
 
     # Start your launcher
     bindsym $mod+d exec $menu
@@ -145,8 +142,17 @@ input type:keyboard {
     #}
 #}
 
+### Various
+gaps inner 0
+default_border pixel 2
+default_floating_border pixel 2
+focus_follows_mouse no
+
+
 exec_always nwg-panel
-exec_always wl-paste --watch cliphist store
+exec wl-paste -p -t text --watch clipman store -P --histpath="~/.local/share/clipman-primary.json"
+exec udiskie
+exec swaymsg "$(get_sway_output_maxrefresh.py)" 
 
 include /etc/sway/config.d/*
 

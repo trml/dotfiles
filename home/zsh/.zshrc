@@ -42,6 +42,7 @@ alias vim='nvim'
 alias asan_log='UBSAN_OPTIONS=log_path=./SAN:print_stacktrace=1:halt_on_errors=0 ASAN_OPTIONS=log_path=./SAN:print_stacktrace=1:check_initialization_order=1:detect_leaks=1:halt_on_errors=0'
 alias grep='/bin/grep --color=auto'
 alias ddnet='$HOME/build/trml-ddnet/Release/DDNet'
+alias history='history 1'
 
 function gret() {
 	/bin/git log --all -p | /bin/grep -inI --color=auto --exclude-dir ".*"
@@ -49,6 +50,10 @@ function gret() {
 
 function grer() {
 	/bin/grep -rna --color=always --include "*.*" --exclude="*.o" --exclude="*.a" --exclude="*.dll" --exclude="*.pyc" --exclude-dir ".*[\.]" --exclude-dir="nimcache" ${@} | /bin/cut -c1-400 | less
+}
+
+function grec() {
+	/bin/grep -rn --color=always --include="*.cpp" --include="*.c" --include="*.hpp" --include="*.h" ${@} | /bin/cut -c1-400 | less
 }
 
 # enable completion
@@ -117,14 +122,16 @@ zstyle ':filter-select' hist-find-no-dups yes
 ####################   conda    ###########################
 ###########################################################
 
-export PATH="/opt/miniconda3/bin:$PATH"
+[ -f /opt/mambaforge/etc/profile.d/conda.sh ] && source /opt/mambaforge/etc/profile.d/conda.sh
 
-__conda_setup="$('/opt/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-		eval "$__conda_setup"
-else
-		if [ -f "/opt/miniconda3/etc/profile.d/conda.sh" ]; then
-				. "/opt/miniconda3/etc/profile.d/conda.sh"
-		fi
-fi
-unset __conda_setup
+#export PATH="/opt/miniconda3/bin:$PATH"
+
+#__conda_setup="$('/opt/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+#if [ $? -eq 0 ]; then
+		#eval "$__conda_setup"
+#else
+		#if [ -f "/opt/miniconda3/etc/profile.d/conda.sh" ]; then
+				#. "/opt/miniconda3/etc/profile.d/conda.sh"
+		#fi
+#fi
+#unset __conda_setup
