@@ -30,129 +30,143 @@ output * background #000000 solid_color
 # You can get the names of your inputs by running: swaymsg -t get_inputs
 # Read `man 5 sway-input` for more information about this section.
 input type:touchpad {
-    dwt								enabled
-    tap								enabled
+	dwt								enabled
+		tap								enabled
 		natural_scroll		disabled
 		middle_emulation	enabled
 }
 
 input type:keyboard {
-		xkb_layout		no_custom_le
+	xkb_layout		no_custom_le
 		xkb_options		caps:escape,nbsp:none
 }
 
 ### Key bindings
-    # Start a terminal
-    bindsym $mod+Return exec $term
+# Start a terminal
+bindsym $mod+Return exec $term
 
-    # Kill focused window
-    bindsym $mod+Shift+q kill
-    bindsym $alt+F4 kill
+# Kill focused window
+#bindsym $mod+Shift+q kill
+bindsym $alt+F4 kill
 
-    # Start your launcher
-    bindsym $mod+d exec $menu
+# Start your launcher
+bindsym $mod+d exec $menu
 
-    # Reload the configuration file
-    bindsym $mod+Shift+r reload
+# Reload the configuration file
+bindsym $mod+Shift+r reload
 
-    # Exit sway (logs you out of your Wayland session)
-    bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
+# Exit sway (logs you out of your Wayland session)
+bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
+
+bindsym $mod+s exec grim - | wl-copy
 #
 # Moving around:
 #
-    # Move your focus around
-    bindsym $mod+$left focus left
-    bindsym $mod+$down focus down
-    bindsym $mod+$up focus up
-    bindsym $mod+$right focus right
-    # Or use $mod+[up|down|left|right]
-    bindsym $mod+Left focus left
-    bindsym $mod+Down focus down
-    bindsym $mod+Up focus up
-    bindsym $mod+Right focus right
+# Move your focus around
+bindsym $mod+$left focus left
+bindsym $mod+$down focus down
+bindsym $mod+$up focus up
+bindsym $mod+$right focus right
+# Or use $mod+[up|down|left|right]
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
 
-    # Move the focused window with the same, but add Shift
-    bindsym $mod+Shift+$left move left
-    bindsym $mod+Shift+$down move down
-    bindsym $mod+Shift+$up move up
-    bindsym $mod+Shift+$right move right
-    # Ditto, with arrow keys
-    bindsym $mod+Shift+Left move left
-    bindsym $mod+Shift+Down move down
-    bindsym $mod+Shift+Up move up
-    bindsym $mod+Shift+Right move right
+set $step 86px
+
+# Move the focused window with the same, but add Shift
+bindsym $mod+Shift+$left move left $step
+bindsym $mod+Shift+$down move down $step
+bindsym $mod+Shift+$up move up $step
+bindsym $mod+Shift+$right move right $step
+# Ditto, with arrow keys
+bindsym $mod+Shift+Left move left $step
+bindsym $mod+Shift+Down move down $step
+bindsym $mod+Shift+Up move up $step
+bindsym $mod+Shift+Right move right $step
+
+# faster resize binds, similar to old archbang openbox tiling keybinds
+bindsym $mod+Ctrl+Right exec swaymsg resize grow right $step; [tiling con_id=__focused__] exec swaymsg resize shrink left $step
+bindsym $mod+Ctrl+Left exec swaymsg resize shrink right $step; [tiling con_id=__focused__] exec swaymsg resize grow left $step
+bindsym $mod+Ctrl+Down exec swaymsg resize grow down $step; [tiling con_id=__focused__] exec swaymsg resize shrink up $step
+bindsym $mod+Ctrl+Up exec swaymsg resize shrink down $step; [tiling con_id=__focused__] exec swaymsg resize grow up $step
+
 #
 # Workspaces:
 #
-    # Switch to workspace
-    bindsym $mod+1 workspace number 1
-    bindsym $mod+2 workspace number 2
-    bindsym $mod+3 workspace number 3
-    bindsym $mod+4 workspace number 4
-    bindsym $mod+5 workspace number 5
-    bindsym $mod+6 workspace number 6
-    bindsym $mod+7 workspace number 7
-    bindsym $mod+8 workspace number 8
-    bindsym $mod+9 workspace number 9
-    bindsym $mod+0 workspace number 10
-    # Move focused container to workspace
-    bindsym $mod+Shift+1 move container to workspace number 1
-    bindsym $mod+Shift+2 move container to workspace number 2
-    bindsym $mod+Shift+3 move container to workspace number 3
-    bindsym $mod+Shift+4 move container to workspace number 4
-    bindsym $mod+Shift+5 move container to workspace number 5
-    bindsym $mod+Shift+6 move container to workspace number 6
-    bindsym $mod+Shift+7 move container to workspace number 7
-    bindsym $mod+Shift+8 move container to workspace number 8
-    bindsym $mod+Shift+9 move container to workspace number 9
-    bindsym $mod+Shift+0 move container to workspace number 10
-    # Note: workspaces can have any name you want, not just numbers.
-    # We just use 1-10 as the default.
+# Switch to workspace
+bindsym $mod+1 workspace number 1
+bindsym $mod+2 workspace number 2
+bindsym $mod+3 workspace number 3
+bindsym $mod+4 workspace number 4
+bindsym $mod+5 workspace number 5
+bindsym $mod+6 workspace number 6
+bindsym $mod+7 workspace number 7
+bindsym $mod+8 workspace number 8
+bindsym $mod+9 workspace number 9
+bindsym $mod+0 workspace number 10
+# Move focused container to workspace
+bindsym $mod+Shift+1 move container to workspace number 1
+bindsym $mod+Shift+2 move container to workspace number 2
+bindsym $mod+Shift+3 move container to workspace number 3
+bindsym $mod+Shift+4 move container to workspace number 4
+bindsym $mod+Shift+5 move container to workspace number 5
+bindsym $mod+Shift+6 move container to workspace number 6
+bindsym $mod+Shift+7 move container to workspace number 7
+bindsym $mod+Shift+8 move container to workspace number 8
+bindsym $mod+Shift+9 move container to workspace number 9
+bindsym $mod+Shift+0 move container to workspace number 10
+# Note: workspaces can have any name you want, not just numbers.
+# We just use 1-10 as the default.
 #
 # Layout stuff:
 #
-    # Make the current focus fullscreen
-    bindsym $mod+f fullscreen
-    bindsym $mod+g fullscreen global 
+# Make the current focus fullscreen
+bindsym $mod+f fullscreen
+bindsym $mod+g fullscreen global 
 
-    # Toggle the current focus between tiling and floating mode
-    bindsym $mod+space floating toggle
+# Toggle the current focus between tiling and floating mode
+bindsym $mod+space floating toggle
 
-    # Swap focus between the tiling area and the floating area
-    bindsym $mod+Shift+space focus mode_toggle
-
-		# faster resize binds, similar to old archbang openbox tiling keybinds
-		bindsym ctrl+$mod+Left exec swaymsg resize grow left 80px; exec swaymsg resize shrink right 80px
-		bindsym ctrl+$mod+Right exec swaymsg resize grow right 80px; exec swaymsg resize shrink left 80px
-		bindsym ctrl+$mod+Up exec swaymsg resize shrink down 80px; exec swaymsg resize grow up 80px
-		bindsym ctrl+$mod+Down exec swaymsg resize grow down 80px; exec swaymsg resize shrink up 80px
+# Swap focus between the tiling area and the floating area
+bindsym $mod+Shift+space focus mode_toggle
 
 # Status Bar:
 #
 # Read `man 5 sway-bar` for more information about this section.
-#bar {
-    #position top
-    ## When the status_command prints a new line to stdout, swaybar updates.
-    ## The default just shows the current date and time.
-    #status_command while date +'%Y-%m-%d %I:%M:%S %p'; do sleep 1; done
-    #colors {
-        #statusline #ffffff
-        #background #323232
-        #inactive_workspace #32323200 #32323200 #5c5c5c
-    #}
-#}
+bar {
+	status_command i3status-rs
+		font pango:Source Code Pro 14
+		position bottom
+# When the status_command prints a new line to stdout, swaybar updates.
+# The default just shows the current date and time.
+#status_command while date +'%Y-%m-%d %I:%M:%S %p'; do sleep 1; done
+		colors {
+#statusline #ffffff
+#background #323232
+#inactive_workspace #32323200 #32323200 #5c5c5c
+			background #002b36
+				statusline #93a1a1
+				separator  #657b83
+				focused_workspace  #586e75 #839496 #002b36
+				active_workspace   #586e75 #586e75 #002b36
+				inactive_workspace #073642 #002b36 #839496
+				urgent_workspace   #dc322f #dc322f #fdf6e3
+		}
+}
 
 ### Various
 gaps inner 0
-default_border pixel 2
-default_floating_border pixel 2
+default_border pixel
+default_floating_border normal
 focus_follows_mouse no
 
-
-exec_always nwg-panel
+# exec_always nwg-panel
 exec wl-paste -p -t text --watch clipman store -P --histpath="~/.local/share/clipman-primary.json"
 exec udiskie
-exec swaymsg "$(get_sway_output_maxrefresh.py)" 
+#exec swaymsg "$(get_sway_output_maxrefresh.py)" 
+exec swaymsg "output DP-1 mode 3440x1440@119.991Hz adaptive_sync off"
 
 include /etc/sway/config.d/*
 

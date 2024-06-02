@@ -8,6 +8,7 @@ setopt autocd
 setopt extendedglob
 setopt nomatch
 setopt completealiases
+setopt interactivecomments
 unsetopt beep notify
 bindkey -e
 
@@ -21,8 +22,13 @@ export XDG_DATA_HOME=$HOME
 export LESS=Rx4
 export PLOTLY_RENDERER="firefox"
 
+export QT_QPA_PLATFORM=xcb
 export PATH="$HOME/dotfiles/bin:$PATH"
+export PATH="/opt/rocm/bin:$PATH"
+export PYTHONPATH="/home/s/build/PLSSVM/build/bindings/Python:$PYTHONPATH"
+export QT_FONT_DPI=120
 export QT_AUTO_SCREEN_SCALE_FACTOR=1 # make qt use .Xresources dpi setting
+export XDG_SESSION_TYPE=wayland
 
 alias valgrind-callgrind='/bin/valgrind --tool=callgrind --dump-line=yes --dump-instr=yes --collect-jumps=yes --collect-systime=yes --cache-sim=yes --branch-sim=yes -v --instr-atstart=no'
 alias mmv='noglob zmv -W'
@@ -44,16 +50,25 @@ alias grep='/bin/grep --color=auto'
 alias ddnet='$HOME/build/trml-ddnet/Release/DDNet'
 alias history='history 1'
 
+function pacfiles() {
+	pacman -Qlq $@ | grep -v '/$' | xargs -r du -h | sort -h
+}
+
 function gret() {
 	/bin/git log --all -p | /bin/grep -inI --color=auto --exclude-dir ".*"
 }
 
 function grer() {
-	/bin/grep -rna --color=always --include "*.*" --exclude="*.o" --exclude="*.a" --exclude="*.dll" --exclude="*.pyc" --exclude-dir ".*[\.]" --exclude-dir="nimcache" ${@} | /bin/cut -c1-400 | less
+	#/bin/grep -RnaH --color=always --include "*.*" --exclude="*.o" --exclude="*.a" --exclude="*.dll" --exclude="*.pyc" --exclude-dir ".*[\.]" --exclude-dir="nimcache" ${@} | /bin/cut -c1-400 | less
+	/bin/grep -RnaH --color=always --include "*.*" --exclude="*.o" --exclude="*.a" --exclude="*.dll" --exclude="*.pyc" --exclude-dir ".*[\.]" --exclude-dir="nimcache" ${@} | less
 }
 
 function grec() {
 	/bin/grep -rn --color=always --include="*.cpp" --include="*.c" --include="*.hpp" --include="*.h" ${@} | /bin/cut -c1-400 | less
+}
+
+function cpr() {
+  rsync --archive -hh --partial --info=stats1,progress2 --modify-window=1 "$@"
 }
 
 # enable completion
@@ -122,16 +137,24 @@ zstyle ':filter-select' hist-find-no-dups yes
 ####################   conda    ###########################
 ###########################################################
 
-[ -f /opt/mambaforge/etc/profile.d/conda.sh ] && source /opt/mambaforge/etc/profile.d/conda.sh
+alias conda='micromamba'
 
-#export PATH="/opt/miniconda3/bin:$PATH"
+export MAMBA_EXE='/usr/bin/micromamba';
+export MAMBA_ROOT_PREFIX='/home/s/micromamba';
+__mamba_setup="$("$MAMBA_EXE" shell hook --shell zsh --root-prefix "$MAMBA_ROOT_PREFIX" 2> /dev/null)"
+if [ $? -eq 0 ]; then
+		eval "$__mamba_setup"
+else
+		alias micromamba="$MAMBA_EXE"  # Fallback on help from mamba activate
+fi
+unset __mamba_setup
+# <<< mamba initialize <<<
 
-#__conda_setup="$('/opt/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-#if [ $? -eq 0 ]; then
-		#eval "$__conda_setup"
-#else
-		#if [ -f "/opt/miniconda3/etc/profile.d/conda.sh" ]; then
-				#. "/opt/miniconda3/etc/profile.d/conda.sh"
-		#fi
-#fi
-#unset __conda_setup
+# activate a default environment when starting a new shell
+if [ -z $CONDA_DEFAULT_ENV ]; then
+	conda activate numpy
+else
+	conda activate $CONDA_DEFAULT_ENV
+fi
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/.local/lib/mojo
+export PATH=$PATH:~/.modular/pkg/packages.modular.com_mojo/bin/

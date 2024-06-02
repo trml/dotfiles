@@ -85,20 +85,27 @@ set tabstop=2
 set softtabstop=2
 set noexpandtab
 set cmdheight=1
-set listchars=nbsp:█
 
-"autocmd Filetype c,cpp,h,hpp setlocal ts=4 sw=4 sts=0 noexpandtab cinoptions+=g0
-autocmd Filetype c,cpp,h,hpp setlocal ts=4 sw=4 sts=0 noexpandtab cinoptions+=g0 list! listchars=tab:>·,extends:>,precedes:<,trail:¬,nbsp:█
-autocmd Filetype rust,rs setlocal ts=2 sw=2 sts=0 noexpandtab cinoptions+=g0 list! listchars=tab:>·,extends:>,precedes:<,trail:¬,nbsp:█
-autocmd Filetype python,musicxml,xml,nim,nimrod,julia,matlab,octave setlocal ts=2 sw=2 sts=0 noexpandtab list! listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
+set list
+set listchars=tab:>·,extends:>,precedes:<,trail:¬,nbsp:█
+
+autocmd Filetype c,cpp,h,hpp setlocal ts=4 sw=4 sts=0 noexpandtab cinoptions+=g0 list listchars=tab:>·,extends:>,precedes:<,trail:¬,nbsp:█
+autocmd Filetype rust,rs setlocal ts=2 sw=2 sts=0 noexpandtab cinoptions+=g0 list listchars=tab:>·,extends:>,precedes:<,trail:¬,nbsp:█
+autocmd Filetype python,musicxml,xml,nim,nimrod,julia,matlab,octave setlocal ts=2 sw=2 sts=0 noexpandtab list listchars=tab:»·,extends:>,precedes:<,trail:¬,nbsp:█
 
 syntax enable
 syntax on
 
 "autocmd filetype c nnoremap <F4> :w <bar> exec '!gcc '.shellescape('%').' -o '.shellescape('%:r').' && ./'.shellescape('%:r')<CR>
-autocmd filetype tex nnoremap <F5> :w <bar> exec '!bibtex '.shellescape('%:r').' && !pdflatex '.shellescape('%:r')<CR>
+"autocmd filetype tex nnoremap <F5> :w <bar> exec '!bibtex '.shellescape('%:r').' && !pdflatex '.shellescape('%:r')<CR>
 
-set clipboard^=unnamedplus
+"vim.opt.clipboard:append { 'unnamed', 'unnamedplus' }
+if has("unnamedplus")
+	set clipboard=unnamedplus
+else
+	set clipboard=unnamed
+endif
+"set clipboard^=unnamedplus
 set pastetoggle=<F10>
 set viminfo='20,<1000,s1000
 nmap <F8> :tabp<cr>
