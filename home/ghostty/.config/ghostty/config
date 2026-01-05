@@ -1,0 +1,4 @@
+theme = Adventure
+font-size = 14
+working-directory = home
+window-inherit-working-directory = false

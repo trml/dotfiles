@@ -1,101 +1,70 @@
 ### Variables
-# Logo key. Use Mod1 for Alt.
 set $mod Mod4
 set $alt Mod1
-# Home row direction keys, like vim
-set $left h
-set $down j
-set $up k
-set $right l
+set $left Left
+set $down Down
+set $up Up
+set $right Right
 
-set $term kitty
-
-#set $menu dmenu_path | dmenu | xargs swaymsg exec --
+set $term ghostty
 set $menu wofi --show run | xargs swaymsg exec
 
-### Output configuration
-# Example configuration:
-#   output HDMI-A-1 resolution 1920x1080 position 1920,0
-# You can get the names of your outputs by running: swaymsg -t get_outputs
 output * background #000000 solid_color
 
-### Idle configuration
-# Example configuration:
-# exec swayidle -w \
-#          timeout 300 'swaylock -f -c 000000' \
-#          timeout 600 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
-#          before-sleep 'swaylock -f -c 000000'
-
-### Input configuration
-# You can get the names of your inputs by running: swaymsg -t get_inputs
-# Read `man 5 sway-input` for more information about this section.
+### Input configuration (swaymsg -t get_inputs, man 5 sway-input)
 input type:touchpad {
-	dwt								enabled
-		tap								enabled
-		natural_scroll		disabled
-		middle_emulation	enabled
+	events                  disabled_on_external_mouse
+	dwt			enabled
+	tap			enabled
+	natural_scroll		disabled
+	middle_emulation	enabled
 }
-
 input type:keyboard {
-	xkb_layout		no_custom_le
-		xkb_options		caps:escape,nbsp:none
+	xkb_layout		no(nodeadkeys)
+	xkb_options		caps:escape,nbsp:none
 }
 
 ### Key bindings
-# Start a terminal
 bindsym $mod+Return exec $term
-
-# Kill focused window
-#bindsym $mod+Shift+q kill
+bindsym $mod+Shift+q kill
 bindsym $alt+F4 kill
-
-# Start your launcher
 bindsym $mod+d exec $menu
-
-# Reload the configuration file
 bindsym $mod+Shift+r reload
-
-# Exit sway (logs you out of your Wayland session)
 bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
-
 bindsym $mod+s exec grim - | wl-copy
-#
+bindsym $mod+l exec swaylock
+
+bindsym --locked XF86MonBrightnessUp exec "sh -c '[ $(brightnessctl g) -lt 80 ] && brightnessctl s 24+ || brightnessctl s 64+'"
+bindsym --locked XF86MonBrightnessDown exec "sh -c '[ $(brightnessctl g) -lt 80 ] && brightnessctl s 24- || brightnessctl s 64- ; [ $(brightnessctl g) -lt 8 ] && brightnessctl s 8'"
+bindsym --locked XF86AudioRaiseVolume exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1+
+bindsym --locked XF86AudioLowerVolume exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1-
+bindsym --locked XF86AudioMute exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+bindsym --locked XF86AudioMicMute exec wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
+bindsym --locked XF86AudioNext exec playerctl next
+bindsym --locked XF86AudioPause exec playerctl play-pause
+bindsym --locked XF86AudioPlay exec playerctl play-pause
+bindsym --locked XF86AudioPrev exec playerctl previous
+
 # Moving around:
-#
-# Move your focus around
 bindsym $mod+$left focus left
 bindsym $mod+$down focus down
 bindsym $mod+$up focus up
 bindsym $mod+$right focus right
-# Or use $mod+[up|down|left|right]
-bindsym $mod+Left focus left
-bindsym $mod+Down focus down
-bindsym $mod+Up focus up
-bindsym $mod+Right focus right
-
-set $step 86px
 
 # Move the focused window with the same, but add Shift
 bindsym $mod+Shift+$left move left $step
 bindsym $mod+Shift+$down move down $step
 bindsym $mod+Shift+$up move up $step
 bindsym $mod+Shift+$right move right $step
-# Ditto, with arrow keys
-bindsym $mod+Shift+Left move left $step
-bindsym $mod+Shift+Down move down $step
-bindsym $mod+Shift+Up move up $step
-bindsym $mod+Shift+Right move right $step
 
 # faster resize binds, similar to old archbang openbox tiling keybinds
-bindsym $mod+Ctrl+Right exec swaymsg resize grow right $step; [tiling con_id=__focused__] exec swaymsg resize shrink left $step
-bindsym $mod+Ctrl+Left exec swaymsg resize shrink right $step; [tiling con_id=__focused__] exec swaymsg resize grow left $step
-bindsym $mod+Ctrl+Down exec swaymsg resize grow down $step; [tiling con_id=__focused__] exec swaymsg resize shrink up $step
-bindsym $mod+Ctrl+Up exec swaymsg resize shrink down $step; [tiling con_id=__focused__] exec swaymsg resize grow up $step
+set $step 86px
+bindsym $mod+Ctrl+$right exec swaymsg resize grow right $step; [tiling con_id=__focused__] exec swaymsg resize shrink left $step
+bindsym $mod+Ctrl+$left exec swaymsg resize shrink right $step; [tiling con_id=__focused__] exec swaymsg resize grow left $step
+bindsym $mod+Ctrl+$down exec swaymsg resize grow down $step; [tiling con_id=__focused__] exec swaymsg resize shrink up $step
+bindsym $mod+Ctrl+$up exec swaymsg resize shrink down $step; [tiling con_id=__focused__] exec swaymsg resize grow up $step
 
-#
 # Workspaces:
-#
-# Switch to workspace
 bindsym $mod+1 workspace number 1
 bindsym $mod+2 workspace number 2
 bindsym $mod+3 workspace number 3
@@ -117,31 +86,22 @@ bindsym $mod+Shift+7 move container to workspace number 7
 bindsym $mod+Shift+8 move container to workspace number 8
 bindsym $mod+Shift+9 move container to workspace number 9
 bindsym $mod+Shift+0 move container to workspace number 10
-# Note: workspaces can have any name you want, not just numbers.
-# We just use 1-10 as the default.
-#
-# Layout stuff:
-#
-# Make the current focus fullscreen
+
+# Layout
 bindsym $mod+f fullscreen
 bindsym $mod+g fullscreen global 
-
-# Toggle the current focus between tiling and floating mode
 bindsym $mod+space floating toggle
-
-# Swap focus between the tiling area and the floating area
 bindsym $mod+Shift+space focus mode_toggle
 
 # Status Bar:
-#
 # Read `man 5 sway-bar` for more information about this section.
-bar {
+ bar {
 	status_command i3status-rs
 		font pango:Source Code Pro 14
 		position bottom
 # When the status_command prints a new line to stdout, swaybar updates.
 # The default just shows the current date and time.
-#status_command while date +'%Y-%m-%d %I:%M:%S %p'; do sleep 1; done
+# status_command while date +'%Y-%m-%d %I:%M:%S %p'; do sleep 1; done
 		colors {
 #statusline #ffffff
 #background #323232
@@ -162,11 +122,17 @@ default_border pixel
 default_floating_border normal
 focus_follows_mouse no
 
-# exec_always nwg-panel
 exec wl-paste -p -t text --watch clipman store -P --histpath="~/.local/share/clipman-primary.json"
 exec udiskie
+# exec_always nwg-panel
+# exec /usr/lib/polkit-kde-authentication-agent-1
 #exec swaymsg "$(get_sway_output_maxrefresh.py)" 
-exec swaymsg "output DP-1 mode 3440x1440@119.991Hz adaptive_sync off"
+# exec swaymsg "output DP-1 mode 3440x1440@119.991Hz adaptive_sync off"
+
+### Idle configuration
+# exec swayidle -w \
+#          timeout 300 'swaylock -f -c 000000' \
+#          timeout 600 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
+#          before-sleep 'swaylock -f -c 000000'
 
 include /etc/sway/config.d/*
-
