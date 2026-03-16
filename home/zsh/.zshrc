@@ -1,150 +1,120 @@
-HISTFILE=$HOME/.histfile
-HISTSIZE=10000
+ZSH=$HOME/.zsh
+ZCACHE=$ZSH/cache
+[[ ! -d $ZSH ]] && mkdir $ZSH
+[[ ! -d $ZCACHE ]] && mkdir -p $ZCACHE
+
+HISTFILE=$ZSH/.histfile
+HISTSIZE=20000
 SAVEHIST=$HISTSIZE
 
-setopt hist_ignore_all_dups
-setopt hist_ignore_space
-setopt appendhistory
+setopt hist_ignore_all_dups hist_ignore_space appendhistory share_history
+setopt extendedglob nomatch completealiases interactivecomments always_to_end
 setopt autocd
-setopt extendedglob
-setopt nomatch
-setopt completealiases
-setopt interactivecomments
-unsetopt beep notify
+setopt prompt_subst
+unsetopt beep notify list_beep flow_control menu_complete
 bindkey -e
 
-export EDITOR='/bin/vim'
-export SUDO_EDITOR='/bin/vim'
-export VISUAL='/bin/vim'
-export ZAW_EDITOR='/bin/vim'
+PROMPT='%F{cyan}%2~%F{red}$(git branch 2>/dev/null | grep "\*" | awk '\''{print " " $NF }'\'' | sed "s/)//g")%F{3}> %f'
+
+typeset -A key
+
+export EDITOR=nvim
+export SUDO_EDITOR=$EDITOR
+export VISUAL=$EDITOR
 export SDL_AUDIODRIVER=pipewire
 export REPORTTIME=1
-export XDG_DATA_HOME=$HOME
 export LESS=Rx4
-export PLOTLY_RENDERER="firefox"
+export PATH=$PATH:~/.local/bin
+[[ -d /opt/rocm/bin ]] && export PATH=$PATH:/opt/rocm/bin
 
-export QT_QPA_PLATFORM=xcb
-export PATH="$HOME/dotfiles/bin:$PATH"
-export PATH="/opt/rocm/bin:$PATH"
-export PYTHONPATH="/home/s/build/PLSSVM/build/bindings/Python:$PYTHONPATH"
-export QT_FONT_DPI=120
-export QT_AUTO_SCREEN_SCALE_FACTOR=1 # make qt use .Xresources dpi setting
-export XDG_SESSION_TYPE=wayland
-
-alias valgrind-callgrind='/bin/valgrind --tool=callgrind --dump-line=yes --dump-instr=yes --collect-jumps=yes --collect-systime=yes --cache-sim=yes --branch-sim=yes -v --instr-atstart=no'
-alias mmv='noglob zmv -W'
+alias git='noglob git'
+alias viless='/usr/share/nvim/runtime/scripts/less.sh'
 alias reswap='sudo /bin/swapoff -a && sudo /bin/swapon -a'
-alias ls='/bin/ls --color=auto'
-alias viless='/usr/share/nvim/runtime/macros/less.sh'
-alias sudo='/bin/sudo '
-alias updatedb='/usr/bin/updatedb --require-visibility 0 -o $HOME/.locate.db'
-alias locate='/usr/bin/locate --database=$HOME/.locate.db'
-alias mountrw='mount -o gid=users,fmask=113,dmask=002'
+alias ls='ls -AF --color=auto'
+alias sudo='sudo '
 alias sourcesh='source $HOME/.zshrc'
-alias sship='$(echo $SSH_CLIENT | awk '\''{ print $1}'\'')'
-alias connectedscreen='$(xrandr -q | grep " connected" | awk "{print $1}" | head -1)'
-alias i3lock='i3lock --color=000000'
-alias bam5='$HOME/build/matricks-bam/bam'
-# alias vim='nvim'
-alias asan_log='UBSAN_OPTIONS=log_path=./SAN:print_stacktrace=1:halt_on_errors=0 ASAN_OPTIONS=log_path=./SAN:print_stacktrace=1:check_initialization_order=1:detect_leaks=1:halt_on_errors=0'
+alias vim='nvim'
 alias grep="/bin/rg"
 alias grem="/bin/rg -g '*.{py,m}'"
 alias grec="/bin/rg -g '*.{c,h,cpp,hpp}'"
-alias ddnet='$HOME/build/trml-ddnet/Release/DDNet'
 alias history='history 1'
 
-function pacfiles() {
-  pacman -Qlq $@ | grep -v '/$' | xargs -r du -h | sort -h
-}
-function cpr() {
-  rsync --archive -hh --partial --info=stats1,progress2 --modify-window=1 "$@"
-}
+function updatedb() { /usr/bin/updatedb --require-visibility 0 -o $HOME/.locate.db --prune-bind-mounts no ; }
+function pacfiles() { pacman -Qlq $@ | grep -v '/$' | xargs -r du -h | sort -h ; }
+function locate() { /usr/bin/locate --database=$HOME/.locate.db $@ ; }
+# function cpr() {
+#   rsync --archive -hh --partial --info=stats1,progress2 --modify-window=1 "$@"
+# }
 
 # enable completion
-zstyle ':completion:*' completer _expand _complete _ignored _correct rehash true
-zstyle :compinstall filename '/home/s/.zshrc'
+zstyle ':completion:*' completer _expand _complete _ignored _correct _list _oldlist 
+zstyle ':completion:*' completions 1 glob 1 insert-unambiguous 1 rehash 1
+zstyle ':completion::complete:*' use-cache 1 cache-path $ZCACHE
+zstyle :compinstall filename '$HOME/.zshrc'
 autoload -Uz compinit promptinit
-compinit
+[[ -f /usr/share/fzf/completion.zsh ]] && source /usr/share/fzf/completion.zsh
+compinit -d $ZCACHE/.zcompdump-$ZSH_VERSION
 promptinit
-
-# Use caching so that commands like pacman complete are useable
-zstyle ':completion::complete:*' use-cache 1
-zstyle ':completion::complete:*' cache-path $HOME/.zsh/cache/
-zstyle ':completion:*:*:git:*' script $HOME/.git-completion.bash
-fpath=($HOME/.zsh $fpath)
-
-my-script_widget() tmux next-window
-zle -N my-script_widget
-bindkey '^[\t' my-script_widget
 
 # set terminal to use 8-bit colors
 # if [[ -e /usr/share/terminfo/x/xterm-256color ]] && [[ "$COLORTERM" == "truecolor" ]]; then
   #export TERM=xterm-256color
 # fi
-
 if [ -n "$DESKTOP_SESSION" ];then
   #eval $(gnome-keyring-daemon --start)
   export SSH_AUTH_SOCK
 fi
 
-###############################################################
-####################    keyboard    ###########################
-###############################################################
+###########################################################
+#### zle functions and shortcuts (history search, etc) ####
+###########################################################
 
-typeset -A key
+zle_highlight=('paste:none')
 
-##############################################################
-##########       plugins, themes/prompt        ###############
-##############################################################
+function commandline-execute {
+	BUFFER="$@"
+	zle accept-line
+}
+function locate-git-repos {
+	dirname $(locate "/.git" | rg "/.git\$" | rg -v ".*/\..+/.+*")
+}
+function _goto-git-repo {
+	FILE=$(locate-git-repos | fzf --exact --no-sort) && [[ -d $FILE ]] && commandline-execute "cd $FILE"
+}
+zle -N _goto-git-repo
+bindkey "^G" _goto-git-repo # Ctrl-G goto git repo
 
-export ZPLUGINDIR=$HOME/dotfiles/zsh-plugins
+function _search-file-git {
+	GITROOTDIR=$(git rev-parse --show-toplevel 2>/dev/null) && \
+	MODIFIED=$(git status --short --untracked-files=no) && \
+	UNMODIFIED=$(comm -13 --nocheck-order <(git status --short | cut -d " " -f 3) <(git ls-files $GITROOTDIR) | sed 's/^/   /') && \
+	{echo $MODIFIED ; echo $UNMODIFIED} | fzf --exact --no-sort | cut --complement -c 1-3
+}
+function _search-and-edit-file-git {
+	FILE=$(_search-file-git) && [[ -n $FILE ]] && commandline-execute "$EDITOR $FILE"
+}
+zle -N _search-and-edit-file-git
+bindkey "^F" _search-and-edit-file-git # Ctrl-F git file search
 
-PROMPT='%F{cyan}%2~%F{red}$(git branch 2>/dev/null | grep "\*" | awk '\''{print " " $NF }'\'' | sed "s/)//g")%F{3}> %f'
-setopt prompt_subst
-
-source $ZPLUGINDIR/zsh-completions/zsh-completions.plugin.zsh
-source $ZPLUGINDIR/zsh-autosuggestions/zsh-autosuggestions.zsh
-source $ZPLUGINDIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-
-# zaw (Ctrl-R history search, etc)
-source $ZPLUGINDIR/zaw/zaw.zsh
-
-bindkey "^X" zaw
-bindkey "^R" zaw-history    # Ctrl-R history search
-bindkey "^F" zaw-git-files  # Ctrl-F git file search
-bindkey -M filterselect "^R" down-line-or-history
-bindkey -M filterselect "^S" up-line-or-history
-bindkey -M filterselect "^E" accept-search
-bindkey -M filterselect "^A" accept-search
-zstyle ':filter-select:highlight' matched fg=green
-zstyle ':filter-select' max-lines -2
-zstyle ':filter-select' rotate-list yes
-zstyle ':filter-select' case-insensitive yes
-zstyle ':filter-select' hist-find-no-dups yes
+function _reverse-history-search {
+	LINE=$(fc -lnr 0 | fzf --exact --no-sort --bind=ctrl-e:accept) && \
+	zle kill-whole-line && zle -U $LINE
+}
+zle -N _reverse-history-search
+bindkey "^R" _reverse-history-search # Ctrl-R reverse history search
 
 ###########################################################
 ###############    conda / mamba    #######################
 ###########################################################
-# Installation:
-#  "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
-
-export MAMBA_EXE='/usr/bin/micromamba';
-if [ -f $MAMBA_EXE ]; then
-  alias conda='micromamba'
-  export MAMBA_ROOT_PREFIX='$HOME/micromamba';
-  __mamba_setup="$("$MAMBA_EXE" shell hook --shell zsh --root-prefix "$MAMBA_ROOT_PREFIX" 2> /dev/null)"
-  if [ $? -eq 0 ]; then
+# >>> mamba initialize >>>
+# !! Contents within this block are managed by 'micromamba shell init' !!
+export MAMBA_EXE='/home/s/.local/bin/micromamba';
+export MAMBA_ROOT_PREFIX='y';
+__mamba_setup="$("$MAMBA_EXE" shell hook --shell zsh --root-prefix "$MAMBA_ROOT_PREFIX" 2> /dev/null)"
+if [ $? -eq 0 ]; then
     eval "$__mamba_setup"
-  else
-    alias micromamba="$MAMBA_EXE"  # Fallback on help from mamba activate
-  fi
-  unset __mamba_setup
-  if [ -z $CONDA_DEFAULT_ENV ]; then
-    conda activate numpy
-  else
-    conda activate $CONDA_DEFAULT_ENV
-  fi
+else
+    alias micromamba="$MAMBA_EXE"  # Fallback on help from micromamba activate
 fi
-
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/.local/lib/mojo
-export PATH=$PATH:~/.modular/pkg/packages.modular.com_mojo/bin/
+unset __mamba_setup
+# <<< mamba initialize <<<

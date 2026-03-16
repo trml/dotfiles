@@ -7,7 +7,7 @@ set $up Up
 set $right Right
 
 set $term ghostty
-set $menu wofi --show run | xargs swaymsg exec
+set $menu rofi -show run
 
 output * background #000000 solid_color
 
@@ -33,6 +33,8 @@ bindsym $mod+Shift+r reload
 bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
 bindsym $mod+s exec grim - | wl-copy
 bindsym $mod+l exec swaylock
+bindsym $mod+o exec screengrab -a
+bindsym $mod+Shift+o exec screengrab -r
 
 bindsym --locked XF86MonBrightnessUp exec "sh -c '[ $(brightnessctl g) -lt 80 ] && brightnessctl s 24+ || brightnessctl s 64+'"
 bindsym --locked XF86MonBrightnessDown exec "sh -c '[ $(brightnessctl g) -lt 80 ] && brightnessctl s 24- || brightnessctl s 64- ; [ $(brightnessctl g) -lt 8 ] && brightnessctl s 8'"
@@ -89,9 +91,9 @@ bindsym $mod+Shift+0 move container to workspace number 10
 
 # Layout
 bindsym $mod+f fullscreen
-bindsym $mod+g fullscreen global 
+bindsym $mod+g fullscreen global
 bindsym $mod+space floating toggle
-bindsym $mod+Shift+space focus mode_toggle
+# # exec swaymsg "output DP-1 mode 3440x1440@119.991Hz adaptive_sync off"
 
 # Status Bar:
 # Read `man 5 sway-bar` for more information about this section.
@@ -121,6 +123,7 @@ gaps inner 0
 default_border pixel
 default_floating_border normal
 focus_follows_mouse no
+focus_wrapping no
 
 exec wl-paste -p -t text --watch clipman store -P --histpath="~/.local/share/clipman-primary.json"
 exec udiskie
