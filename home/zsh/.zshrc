@@ -13,10 +13,9 @@ setopt autocd
 setopt prompt_subst
 unsetopt beep notify list_beep flow_control menu_complete
 bindkey -e
+typeset -A key
 
 PROMPT='%F{cyan}%2~%F{red}$(git branch 2>/dev/null | grep "\*" | awk '\''{print " " $NF }'\'' | sed "s/)//g")%F{3}> %f'
-
-typeset -A key
 
 export EDITOR=nvim
 export SUDO_EDITOR=$EDITOR
@@ -25,7 +24,6 @@ export SDL_AUDIODRIVER=pipewire
 export REPORTTIME=1
 export LESS=Rx4
 export PATH=$PATH:~/.local/bin
-[[ -d /opt/rocm/bin ]] && export PATH=$PATH:/opt/rocm/bin
 
 alias git='noglob git'
 alias viless='/usr/share/nvim/runtime/scripts/less.sh'
@@ -35,16 +33,13 @@ alias sudo='sudo '
 alias sourcesh='source $HOME/.zshrc'
 alias vim='nvim'
 alias grep="/bin/rg"
-alias grem="/bin/rg -g '*.{py,m}'"
-alias grec="/bin/rg -g '*.{c,h,cpp,hpp}'"
+alias grem="/bin/rg -g '*.{py,m,jl,sh,lua}'"
+alias grec="/bin/rg -g '*.{c,h,cpp,hpp,rs,zig,nim}'"
 alias history='history 1'
 
 function updatedb() { /usr/bin/updatedb --require-visibility 0 -o $HOME/.locate.db --prune-bind-mounts no ; }
 function pacfiles() { pacman -Qlq $@ | grep -v '/$' | xargs -r du -h | sort -h ; }
 function locate() { /usr/bin/locate --database=$HOME/.locate.db $@ ; }
-# function cpr() {
-#   rsync --archive -hh --partial --info=stats1,progress2 --modify-window=1 "$@"
-# }
 
 # enable completion
 zstyle ':completion:*' completer _expand _complete _ignored _correct _list _oldlist 
@@ -56,12 +51,7 @@ autoload -Uz compinit promptinit
 compinit -d $ZCACHE/.zcompdump-$ZSH_VERSION
 promptinit
 
-# set terminal to use 8-bit colors
-# if [[ -e /usr/share/terminfo/x/xterm-256color ]] && [[ "$COLORTERM" == "truecolor" ]]; then
-  #export TERM=xterm-256color
-# fi
 if [ -n "$DESKTOP_SESSION" ];then
-  #eval $(gnome-keyring-daemon --start)
   export SSH_AUTH_SOCK
 fi
 
@@ -79,16 +69,17 @@ function locate-git-repos {
 	dirname $(locate "/.git" | rg "/.git\$" | rg -v ".*/\..+/.+*")
 }
 function _goto-git-repo {
-	FILE=$(locate-git-repos | fzf --exact --no-sort) && [[ -d $FILE ]] && commandline-execute "cd $FILE"
+	FILE=$(locate-git-repos | tac | fzf --exact --no-sort --cycle) && [[ -d $FILE ]] && commandline-execute "cd $FILE"
 }
 zle -N _goto-git-repo
 bindkey "^G" _goto-git-repo # Ctrl-G goto git repo
 
 function _search-file-git {
 	GITROOTDIR=$(git rev-parse --show-toplevel 2>/dev/null) && \
-	MODIFIED=$(git status --short --untracked-files=no) && \
-	UNMODIFIED=$(comm -13 --nocheck-order <(git status --short | cut -d " " -f 3) <(git ls-files $GITROOTDIR) | sed 's/^/   /') && \
-	{echo $MODIFIED ; echo $UNMODIFIED} | fzf --exact --no-sort | cut --complement -c 1-3
+	GITFILES=$(git ls-files $GITROOTDIR | /bin/grep -Fxvf  <(git config --file .gitmodules --name-only --get-regexp path | cut -d '.' -f2-2) ) \
+	MODIFIED=$(git status --untracked-files=no | grep "\t" | sed 's/\t//' | grep . | tac) && \
+	UNMODIFIED=$(/bin/grep -Fvxf <(git status --untracked-files=no --porcelain=1 | cut -d " " -f 3) <(echo $GITFILES) | sed 's/^/  /' | tac) && \
+	{echo $MODIFIED ; echo $UNMODIFIED} | grep . | fzf --exact --no-sort --cycle | awk -F ':' '{print $NF}' | tr -d ' '
 }
 function _search-and-edit-file-git {
 	FILE=$(_search-file-git) && [[ -n $FILE ]] && commandline-execute "$EDITOR $FILE"
@@ -103,18 +94,3 @@ function _reverse-history-search {
 zle -N _reverse-history-search
 bindkey "^R" _reverse-history-search # Ctrl-R reverse history search
 
-###########################################################
-###############    conda / mamba    #######################
-###########################################################
-# >>> mamba initialize >>>
-# !! Contents within this block are managed by 'micromamba shell init' !!
-export MAMBA_EXE='/home/s/.local/bin/micromamba';
-export MAMBA_ROOT_PREFIX='y';
-__mamba_setup="$("$MAMBA_EXE" shell hook --shell zsh --root-prefix "$MAMBA_ROOT_PREFIX" 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__mamba_setup"
-else
-    alias micromamba="$MAMBA_EXE"  # Fallback on help from micromamba activate
-fi
-unset __mamba_setup
-# <<< mamba initialize <<<

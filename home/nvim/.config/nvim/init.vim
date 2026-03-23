@@ -1,14 +1,3 @@
-" From defaults.vim
-if v:progname =~? "evim"
-	finish
-endif
-if exists('skip_defaults_vim')
-	finish
-endif
-if &compatible
-	set nocompatible
-endif
-
 set ttimeout
 set ttimeoutlen=100
 set display=truncate
@@ -17,9 +6,8 @@ set nrformats-=octal
 if has('win32')
 	set guioptions-=t
 endif
-map Q gq
-sunmap Q
-inoremap <C-U> <C-G>u<C-U>
+inoremap <c-u> <c-g>u<c-u>
+inoremap <c-w> <c-g>u<c-w>
 
 set mouse=
 set selectmode=
@@ -38,20 +26,17 @@ endif
 
 set viewoptions=cursor,folds,slash,unix
 set grepprg=grep\ -nH\ $*
-set history=5000 " keep 200 lines of command line history
+set history=5000
 
 let mapleader = "."
 set viminfo='20,<1000,s1000
 set clipboard=unnamedplus
-" vnoremap <LeftRelease> "+y<LeftRelease>
 set exrc
 set secure
 nnoremap <esc> :noh<cr>
 
-" Return to previous cursor position when opening a file
 autocmd BufReadPost * if line("'\"") >= 1 && line("'\"") <= line("$") && &filetype !~# 'commit' && index(['xxd', 'gitrebase'], &filetype) == -1 && !&diff | exe "normal! g`\"" | endif
 
-" Commenting / uncommenting blocks of code
 let b:ccl = '#'
 autocmd FileType c,cpp,h,hpp,java,scala,php,javascript,js,ts,jsx,tsx let b:ccl = '//'
 autocmd FileType matlab,tex,bib let b:ccl = '%'
@@ -70,7 +55,6 @@ noremap <leader>cc :call Comment()<CR>
 noremap <leader>cu :call UnComment()<CR>
 noremap <leader>ci :call ToggleComment()<CR>
 
-" Rules for tabs/indents
 set list listchars=tab:>·,extends:>,precedes:<,trail:¬,nbsp:█
 set cino=:0,l1,g0,(0,u0,W2s
 set sw=2 ts=2 sts=2 noexpandtab
@@ -92,7 +76,6 @@ set undodir=$HOME/.vim/tmp
 set undofile
 set undoreload=10000
 
-" Make shift-insert work like in Xterm
 if has('gui_running')
 	map <S-Insert> <MiddleMouse>
 	map! <S-Insert> <MiddleMouse>
@@ -103,7 +86,7 @@ if has('termguicolors') && $COLORTERM=='truecolor'
 else
 	set notermguicolors
 endif
-colorscheme sorbet " habamax / retrobox / sorbet
+colorscheme sorbet
 set background=dark
 
 set cursorline
