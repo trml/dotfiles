@@ -6,8 +6,6 @@ set nrformats-=octal
 if has('win32')
 	set guioptions-=t
 endif
-inoremap <c-u> <c-g>u<c-u>
-inoremap <c-w> <c-g>u<c-w>
 
 set mouse=
 set selectmode=
@@ -33,37 +31,6 @@ set viminfo='20,<1000,s1000
 set clipboard=unnamedplus
 set exrc
 set secure
-nnoremap <esc> :noh<cr>
-
-autocmd BufReadPost * if line("'\"") >= 1 && line("'\"") <= line("$") && &filetype !~# 'commit' && index(['xxd', 'gitrebase'], &filetype) == -1 && !&diff | exe "normal! g`\"" | endif
-
-let b:ccl = '#'
-autocmd FileType c,cpp,h,hpp,java,scala,php,javascript,js,ts,jsx,tsx let b:ccl = '//'
-autocmd FileType matlab,tex,bib let b:ccl = '%'
-autocmd FileType vim let b:ccl = '"'
-autocmd FileType markdown let b:ccl = '<---'
-function! Comment()
-	exe "s@^@".b:ccl." @"
-endfun
-function! UnComment()
-	exe "s@^[\ ]*".b:ccl." @@e"
-endfun
-function! ToggleComment()
-	exe "s@^@".b:ccl." @ | s@^".b:ccl." ".b:ccl." @@e"
-endfun
-noremap <leader>cc :call Comment()<CR>
-noremap <leader>cu :call UnComment()<CR>
-noremap <leader>ci :call ToggleComment()<CR>
-
-set list listchars=tab:>·,extends:>,precedes:<,trail:¬,nbsp:█
-set cino=:0,l1,g0,(0,u0,W2s
-set sw=2 ts=2 sts=2 noexpandtab
-autocmd Filetype c,cpp,h,hpp,java setlocal ts=4 sw=4 sts=0 noexpandtab
-autocmd Filetype rust,rs,python,musicxml,xml,nim,nimrod,julia,matlab,octave setlocal ts=2 sw=2 sts=0 noexpandtab
-
-filetype plugin indent on
-syntax enable
-syntax on
 
 set cmdheight=1
 set laststatus=2
@@ -75,6 +42,51 @@ set directory=$HOME/.vim/tmp
 set undodir=$HOME/.vim/tmp
 set undofile
 set undoreload=10000
+
+inoremap <c-u> <c-g>u<c-u>
+inoremap <c-w> <c-g>u<c-w>
+nnoremap <esc> :noh<cr>
+nnoremap > >>
+nnoremap < <<
+vnoremap < <gv
+vnoremap > >gv
+vnoremap = =gv
+
+autocmd BufReadPost * if line("'\"") >= 1 && line("'\"") <= line("$") && &filetype !~# 'commit' && index(['xxd', 'gitrebase'], &filetype) == -1 && !&diff | exe "normal! g`\"" | endif
+
+let b:ccl = '#'
+autocmd FileType python,julia,nim let b:ccl = '#'
+autocmd FileType c,cpp,h,hpp,java,scala,php,javascript,js,ts,jsx,tsx,kotlin,zig,rust let b:ccl = '//'
+autocmd FileType matlab,tex,bib,octave let b:ccl = '% '
+autocmd FileType vim let b:ccl = '"'
+autocmd FileType markdown let b:ccl = '<---'
+autocmd FileType lua let b:ccl = '--'
+autocmd FileType lisp let b:ccl = ';'
+function! Comment()
+	exe "s@^\\s*\\zs@".b:ccl."@"
+endfun
+function! UnComment()
+	exe "s@^\\s*\\zs".b:ccl."@@e"
+endfun
+function! ToggleComment()
+	exe "s@^\\s*\\zs@".b:ccl."@ | s@^\\s*\\zs".b:ccl.b:ccl."@@e"
+endfun
+noremap <leader>cc :call Comment()<CR>
+noremap <leader>cu :call UnComment()<CR>
+noremap <leader>ci :call ToggleComment()<CR>
+vnoremap <leader>cc :call Comment()<CR>gv
+vnoremap <leader>cu :call UnComment()<CR>gv
+vnoremap <leader>ci :call ToggleComment()<CR>gv
+
+set list listchars=tab:>·,extends:>,precedes:<,trail:¬,nbsp:█
+set cino=:0,l1,g0,(0,u0,W2s
+set sw=2 ts=2 sts=2 noexpandtab
+autocmd Filetype c,cpp,h,hpp,java setlocal ts=4 sw=4 sts=0 expandtab
+autocmd Filetype rust,rs,python,musicxml,xml,nim,nimrod,julia,matlab,octave,lua setlocal ts=4 sw=4 sts=0 expandtab
+
+filetype plugin indent on
+syntax enable
+syntax on
 
 if has('gui_running')
 	map <S-Insert> <MiddleMouse>
