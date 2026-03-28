@@ -62,7 +62,7 @@ autocmd FileType matlab,tex,bib,octave let b:ccl = '% '
 autocmd FileType vim let b:ccl = '"'
 autocmd FileType markdown let b:ccl = '<---'
 autocmd FileType lua let b:ccl = '--'
-autocmd FileType lisp let b:ccl = ';'
+autocmd FileType lisp,gitconfig let b:ccl = ';'
 function! Comment()
 	exe "s@^\\s*\\zs@".b:ccl."@"
 endfun
