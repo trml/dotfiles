@@ -46,6 +46,7 @@ set undoreload=10000
 inoremap <c-u> <c-g>u<c-u>
 inoremap <c-w> <c-g>u<c-w>
 nnoremap <esc> :noh<cr>
+inoremap <s-tab> <c-d>
 nnoremap > >>
 nnoremap < <<
 vnoremap < <gv
