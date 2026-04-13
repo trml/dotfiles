@@ -24,6 +24,7 @@ export SDL_AUDIODRIVER=pipewire
 export REPORTTIME=1
 export LESS=Rx4
 export PATH=$PATH:~/.local/bin
+export TERM=xterm
 
 alias git='noglob git'
 alias viless='/usr/share/nvim/runtime/scripts/less.sh'
@@ -60,19 +61,49 @@ fi
 ###########################################################
 
 zle_highlight=('paste:none')
+autoload -U zargs
 
 function commandline-execute {
 	BUFFER="$@"
 	zle accept-line
 }
+
+function _print-git-repo-name-and-status {
+	cd $@
+	MOD=$(git status --untracked-files=no --short | cut -c1-3)
+	NUM=$(echo $MOD | grep . | wc -l)
+	if [ $NUM -eq 0 ]; then
+		if [ $(git log --branches --not --remotes | wc -l) -gt 0 ]; then
+			ST=" (unpushed)"
+			ST="\e[0;33m$ST\e[0m"
+		else
+			ST=""
+		fi
+	elif [ $( echo $MOD | cut -c2-2 | grep "M" | wc -l) -gt 0 ]; then
+		ST=" (modified:$NUM)"
+		ST="\e[0;31m$ST\e[0m"
+	elif [ $( echo $MOD | grep "M  " | wc -l) -gt 0 ]; then
+		ST=" (staged:$NUM)"
+		ST="\e[0;32m$ST\e[0m"
+	else
+		ST=" (??:$NUM)"
+		ST="\e[0;31m$ST\e[0m"
+	fi
+	print "$@$ST"
+}
 function locate-git-repos {
 	dirname $(locate "/.git" | rg "/.git\$" | rg -v ".*/\..+/.+*")
 }
+function locate-git-repos-and-status {
+	zargs -P 32 -I {} -- $(locate-git-repos) -- _print-git-repo-name-and-status {}
+}
 function _goto-git-repo {
-	FILE=$(locate-git-repos | tac | fzf --exact --no-sort --cycle) && [[ -d $FILE ]] && commandline-execute "cd $FILE"
+	local REPORTTIME=-1
+	FILE=$(locate-git-repos-and-status | tac | fzf --exact --no-sort --cycle --ansi | awk '{print $1}') && [[ -d $FILE ]] && commandline-execute "cd $FILE"
 }
 zle -N _goto-git-repo
 bindkey "^G" _goto-git-repo # Ctrl-G goto git repo
+
 
 function _search-file-git {
 	GITROOTDIR=$(git rev-parse --show-toplevel 2>/dev/null) && \
@@ -82,15 +113,32 @@ function _search-file-git {
 	{echo $MODIFIED ; echo $UNMODIFIED} | grep . | fzf --exact --no-sort --cycle | awk -F ':' '{print $NF}' | tr -d ' '
 }
 function _search-and-edit-file-git {
+	local REPORTTIME=-1
 	FILE=$(_search-file-git) && [[ -n $FILE ]] && commandline-execute "$EDITOR $FILE"
 }
 zle -N _search-and-edit-file-git
 bindkey "^F" _search-and-edit-file-git # Ctrl-F git file search
 
 function _reverse-history-search {
+	local REPORTTIME=-1
 	LINE=$(fc -lnr 0 | fzf --exact --no-sort --bind=ctrl-e:accept) && \
 	zle kill-whole-line && zle -U $LINE
 }
 zle -N _reverse-history-search
 bindkey "^R" _reverse-history-search # Ctrl-R reverse history search
 
+###################################################################
+#### start background jobs on init (update plocate, gitindex) #####
+###################################################################
+
+function _zsh-background-init {
+	updatedb
+	locate-git-repos-and-status
+}
+function _zsh-background-init-fork {
+	_zsh-background-init &
+}
+if [ -z $ZSH_LAST_BACKGROUND_INIT -o $(( $(date +%s) > $ZSH_LAST_BACKGROUND_INIT+3600 )) -eq 1 ]; then
+	export ZSH_LAST_BACKGROUND_INIT=$(date +%s)
+	_updatedb_and_gitindex > /dev/null 2>&1
+fi
