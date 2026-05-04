@@ -31,7 +31,7 @@ bindsym $alt+F4 kill
 bindsym $mod+d exec $menu
 bindsym $mod+Shift+r reload
 bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
-bindsym $mod+s exec grim - | wl-copy
+bindsym $mod+p exec grim - | wl-copy
 bindsym $mod+l exec swaylock
 bindsym $mod+o exec screengrab -a
 bindsym $mod+Shift+o exec screengrab -r
@@ -46,6 +46,15 @@ bindsym --locked XF86AudioNext exec playerctl next
 bindsym --locked XF86AudioPause exec playerctl play-pause
 bindsym --locked XF86AudioPlay exec playerctl play-pause
 bindsym --locked XF86AudioPrev exec playerctl previous
+
+bindsym $mod+b splith
+bindsym $mod+v splitv
+bindsym $mod+s layout stacking
+bindsym $mod+e layout toggle split
+bindsym $mod+j focus prev
+bindsym $mod+k focus next
+bindsym $mod+u focus parent
+bindsym $mod+i focus child
 
 # Moving around:
 bindsym $mod+$left focus left

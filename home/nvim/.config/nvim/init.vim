@@ -81,7 +81,7 @@ vnoremap <leader>ci :call ToggleComment()<CR>gv
 
 set list listchars=tab:>·,extends:>,precedes:<,trail:¬,nbsp:█
 set cino=:0,l1,g0,(0,u0,W2s
-set sw=2 ts=2 sts=2 noexpandtab
+set sw=4 ts=4 sts=0 expandtab
 autocmd Filetype c,cpp,h,hpp,java setlocal ts=4 sw=4 sts=0 expandtab
 autocmd Filetype rust,rs,python,musicxml,xml,nim,nimrod,julia,matlab,octave,lua setlocal ts=4 sw=4 sts=0 expandtab
 
