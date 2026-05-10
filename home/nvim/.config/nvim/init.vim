@@ -53,6 +53,11 @@ vnoremap < <gv
 vnoremap > >gv
 vnoremap = =gv
 
+map <C-a> <Nop> " disable decrement/incrementing number under cursor on ctrl-a/ctrl-x
+map <C-x> <Nop>
+map g<C-a> <Nop>
+map g<C-x> <Nop>
+
 autocmd BufReadPost * if line("'\"") >= 1 && line("'\"") <= line("$") && &filetype !~# 'commit' && index(['xxd', 'gitrebase'], &filetype) == -1 && !&diff | exe "normal! g`\"" | endif
 
 let b:ccl = '#'
@@ -82,8 +87,8 @@ vnoremap <leader>ci :call ToggleComment()<CR>gv
 set list listchars=tab:>·,extends:>,precedes:<,trail:¬,nbsp:█
 set cino=:0,l1,g0,(0,u0,W2s
 set sw=4 ts=4 sts=0 expandtab
-autocmd Filetype c,cpp,h,hpp,java setlocal ts=4 sw=4 sts=0 expandtab
-autocmd Filetype rust,rs,python,musicxml,xml,nim,nimrod,julia,matlab,octave,lua setlocal ts=4 sw=4 sts=0 expandtab
+autocmd Filetype c,cpp,h,hpp,matlab,octave setlocal ts=4 sw=4 sts=0 expandtab
+autocmd Filetype rust,rs,python,musicxml,xml,nim,julia,lua,zig,rust,java,kotlin,js,ts setlocal ts=4 sw=4 sts=0 expandtab
 
 filetype plugin indent on
 syntax enable
@@ -99,7 +104,9 @@ if has('termguicolors') && $COLORTERM=='truecolor'
 else
 	set notermguicolors
 endif
-colorscheme sorbet
+silent! colorscheme ron
+silent! colorscheme slate
+silent! colorscheme sorbet
 set background=dark
 
 set cursorline

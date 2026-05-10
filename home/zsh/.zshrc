@@ -17,6 +17,28 @@ typeset -A key
 
 PROMPT='%F{cyan}%2~%F{red}$(git branch 2>/dev/null | grep "\*" | awk '\''{print " " $NF }'\'' | sed "s/)//g")%F{3}> %f'
 
+str_abbrev() {
+    abbr="${1[1,$2]}.."              # abbreviate $1 to to $2 characters,
+    [ $#abbr -ge $#1 ] && print "$1" || print "$abbr" # return abbreviated if shorter than original
+}
+
+if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
+    USERSTR=$(str_abbrev $USER 9)
+    HOSTSTR=$(str_abbrev $HOST 9)
+    PROMPT="%F{red}$USERSTR@$HOSTSTR $PROMPT"
+fi
+
+#if [ -n "$DESKTOP_SESSION" ];then
+#export $SSH_AUTH_SOCK
+#fi
+
+if [[ "$XDG_CURRENT_DESKTOP" == *"GNOME" ]]; then
+    dconf write /org/gnome/desktop/input-sources/xkb-options "['caps:escape']"
+    dconf write /org/gnome/desktop/interface/enable-animations "false"
+    dconf write /org/gnome/desktop/search-provider/disable-external "true"
+    dconf write /org/gnome/SessionManager/logout-prompt "false"
+fi
+
 export EDITOR=nvim
 export SUDO_EDITOR=$EDITOR
 export VISUAL=$EDITOR
@@ -45,6 +67,8 @@ function updatedb() { /usr/bin/updatedb --require-visibility 0 -o $HOME/.locate.
 function pacfiles() { pacman -Qlq $@ | grep -v '/$' | xargs -r du -h | sort -h ; }
 function locate() { /usr/bin/locate --database=$HOME/.locate.db $@ ; }
 
+[[ -f /etc/zsh_command_not_found ]] && source /etc/zsh_command_not_found
+
 # enable completion
 zstyle ':completion:*' completer _expand _complete _ignored _correct _list _oldlist 
 zstyle ':completion:*' completions 1 glob 1 insert-unambiguous 1 rehash 1
@@ -63,14 +87,15 @@ fi
 #### zle functions and shortcuts (history search, etc) ####
 ###########################################################
 
-zle_highlight=('paste:none')
 autoload -U zargs
+zle_highlight=('paste:none')
 
 function commandline-execute {
     BUFFER="$@"
     zle accept-line
 }
 
+######### Search for and goto git repository #############
 function _print-git-repo-name-and-status {
     cd $@
     MOD=$(git status --untracked-files=no --short | cut -c1-3)
@@ -92,21 +117,24 @@ function _print-git-repo-name-and-status {
         ST=" (??:$NUM)"
         ST="\e[0;31m$ST\e[0m"
     fi
-    print "$@$ST"
+    print "$@\t${@/$HOME/\~}$ST"
 }
 function locate-git-repos {
-    dirname $(locate "/.git" | rg "/.git\$" | rg -v ".*/\..+/.+*")
+    locate "/.git" | rg "/.git\$" | rg -v ".*/\..+/.+*" | while IFS= read -r p; do
+        [ -d "$p" ] && print $(dirname $p)
+    done
 }
 function locate-git-repos-and-status {
-    zargs -P 32 -I {} -- $(locate-git-repos) -- _print-git-repo-name-and-status {}
+    zargs -P 32 -I {} $(locate-git-repos) -- _print-git-repo-name-and-status {}
 }
 function _goto-git-repo {
     local REPORTTIME=-1
-    FILE=$(locate-git-repos-and-status | tac | fzf --exact --no-sort --cycle --ansi | awk '{print $1}') && [[ -d $FILE ]] && commandline-execute "cd $FILE"
+    FILE=$(locate-git-repos-and-status | tac | fzf --exact --no-sort --cycle --ansi --with-nth=2.. | cut -f1) && [[ -d $FILE ]] && commandline-execute "cd $FILE"
 }
 zle -N _goto-git-repo
-bindkey "^G" _goto-git-repo # Ctrl-G goto git repo
+bindkey "^G" _goto-git-repo # goto git repo
 
+######### Search for and goto file within git repo #############
 function _ls-files-git-with-status {
     FILT="(^|/)\.?[^\.^/]+($|\.txt$)"
     GITROOTDIR=$(git rev-parse --show-toplevel 2>/dev/null) && \
@@ -128,13 +156,16 @@ function _search-and-edit-file-git {
     FILE=$(_search-file-git) && [[ -n $FILE ]] && commandline-execute "$EDITOR $FILE"
 }
 zle -N _search-and-edit-file-git
-bindkey "^F" _search-and-edit-file-git # Ctrl-F git file search
+bindkey "^F" _search-and-edit-file-git # git filename search
 
+####### Search-in-files -- search words in files and open file in editor at line #######
 function _search-and-edit-line-git {
     local REPORTTIME=-1
     export TEMP=$(mktemp -u)
     trap 'rm -f "$TEMP"' EXIT
     FILES=$(_ls-files-git | tr '\n' ' ')
+    PREVIEW='less {1}'
+    [ $(command -v bat) ] && PREVIEW='bat --color=always {1} --highlight-line {2}'
     TR_CHANGE='rg_pat={q:1}      # The first word is passed to ripgrep
     fzf_pat={q:2..}   # The rest are passed to fzf
     if ! [[ -r "$TEMP" ]] || [[ $rg_pat != $(cat "$TEMP") ]]; then
@@ -148,7 +179,7 @@ function _search-and-edit-line-git {
     fzf --ansi --exact --smart-case --cycle \
         --color "hl:-1:underline:bold,hl+:-1:underline:reverse" \
         --with-shell 'zsh -c' \
-        --preview 'bat --color=always {1} --highlight-line {2}' \
+        --preview $PREVIEW \
         --preview-window 'hidden,+{2}+3/3,~3' \
         --bind 'start,change:transform:'$TR_CHANGE \
         --bind 'focus,resize:transform:'$TR_RESIZE \
@@ -156,8 +187,9 @@ function _search-and-edit-line-git {
         --delimiter :
 }
 zle -N _search-and-edit-line-git
-bindkey "^E" _search-and-edit-line-git # Ctrl-E for search-in-files
+bindkey "^E" _search-and-edit-line-git # search-in-files
 
+############## Reverse history search ################
 function _reverse-history-search {
     local REPORTTIME=-1
     LINE=$(fc -lnr 0 | fzf --exact --no-sort --bind=ctrl-e:accept) && \
@@ -165,6 +197,24 @@ function _reverse-history-search {
 }
 zle -N _reverse-history-search
 bindkey "^R" _reverse-history-search # Ctrl-R reverse history search
+
+###### replicate bash behaviour for IGNOREEOF on ctrl-d #########
+setopt ignore_eof
+function _bash-ctrl-d() {
+    if [[ $CURSOR == 0 && -z $BUFFER ]]
+    then
+        [[ -z $IGNOREEOF || $IGNOREEOF == 0 ]] && exit
+        if [[ "$LASTWIDGET" == "_bash-ctrl-d" ]]
+        then
+            (( --__BASH_IGNORE_EOF <= 0 )) && exit
+        else
+            echo "Press ctrl-d again to exit... (IGNOREEOF:$IGNOREEOF)"
+            (( __BASH_IGNORE_EOF = IGNOREEOF ))
+        fi
+    fi
+}
+zle -N _bash-ctrl-d
+bindkey "^D" _bash-ctrl-d
 
 ###################################################################
 #### start background jobs on init (update plocate, gitindex) #####
@@ -181,3 +231,6 @@ if [ -z $ZSH_LAST_BACKGROUND_INIT -o $(( $(date +%s) > $ZSH_LAST_BACKGROUND_INIT
     export ZSH_LAST_BACKGROUND_INIT=$(date +%s)
     _updatedb_and_gitindex > /dev/null 2>&1
 fi
+
+# activate python venv if exists
+[[ -d ~/.venv/venv ]] && source ~/.venv/venv/bin/activate
