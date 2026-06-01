@@ -118,10 +118,10 @@ function _print-git-repo-name-and-status {
     print "$DIR\t${DIR/$HOME/\~}$ST"
 }
 function locate-git-repos {
-    zargs -P 32 -I {} $(locate --existing "/.git" | rg "/.git\$" | rg -v ".*/\..+/.+*") -- dirname {}
+    zargs -P 32 -I {} $(locate --existing "/.git" | rg "/.git\$" | rg -v "/\..*/|/_|/bak_|/bak\.|_bak/|.bak/") -- dirname {}
 }
 function locate-git-repos-and-status {
-    zargs -P 32 -I {} $(locate --existing "/.git" | rg "/.git\$" | rg -v ".*/\..+/.+*") -- _print-git-repo-name-and-status {}
+    zargs -P 32 -I {} $(locate --existing "/.git" | rg "/.git\$" | rg -v "/\..*/|/_|/bak_|/bak\.|_bak/|.bak/") -- _print-git-repo-name-and-status {}
 }
 function _goto-git-repo {
     local REPORTTIME=-1
