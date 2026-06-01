@@ -14,6 +14,7 @@ setopt prompt_subst
 unsetopt beep notify list_beep flow_control menu_complete
 bindkey -e
 typeset -A key
+HISTORY_IGNORE="(ls(|*)|cd(|*)|pwd|exit|whoami)"
 
 PROMPT='%F{cyan}%2~%F{red}$(git branch 2>/dev/null | grep "\*" | awk '\''{print " " $NF }'\'' | sed "s/)//g")%F{3}> %f'
 
@@ -28,8 +29,9 @@ if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
     PROMPT="%F{red}$USERSTR@$HOSTSTR $PROMPT"
 fi
 
+export SSH_AUTH_SOCK=
 #if [ -n "$DESKTOP_SESSION" ];then
-#export $SSH_AUTH_SOCK
+#export SSH_AUTH_SOCK=
 #fi
 
 if [[ "$XDG_CURRENT_DESKTOP" == *"GNOME" ]]; then
@@ -42,11 +44,10 @@ fi
 export EDITOR=nvim
 export SUDO_EDITOR=$EDITOR
 export VISUAL=$EDITOR
-export SDL_AUDIODRIVER=pipewire
 export REPORTTIME=1
+export TERM=xterm
 export LESS=Rx4
 export PATH=$PATH:~/.local/bin
-export TERM=xterm
 
 function ztrim() { sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' $@ }
 
@@ -63,11 +64,11 @@ alias grec="/bin/rg --color ansi -g '*.{c,h,cpp,hpp,rs,zig,nim}'"
 function greb() { /bin/rg -aPo --no-mmap --line-buffered --trim --column --color=never ".{0,60}$1.{0,60}" ${@:2} | while read -r line; do; echo $line | strings -w -s " " | ztrim; done }
 alias history='history 1'
 
+[[ -f /etc/zsh_command_not_found ]] && source /etc/zsh_command_not_found
+
 function updatedb() { /usr/bin/updatedb --require-visibility 0 -o $HOME/.locate.db --prune-bind-mounts no ; }
 function pacfiles() { pacman -Qlq $@ | grep -v '/$' | xargs -r du -h | sort -h ; }
-function locate() { /usr/bin/locate --existing --database=$HOME/.locate.db $@ ; }
-
-[[ -f /etc/zsh_command_not_found ]] && source /etc/zsh_command_not_found
+function locate() { /usr/bin/locate --database=$HOME/.locate.db $@ ; }
 
 # enable completion
 zstyle ':completion:*' completer _expand _complete _ignored _correct _list _oldlist 
@@ -79,15 +80,10 @@ autoload -Uz compinit promptinit
 compinit -d $ZCACHE/.zcompdump-$ZSH_VERSION
 promptinit
 
-if [ -n "$DESKTOP_SESSION" ];then
-    export SSH_AUTH_SOCK
-fi
-
 ###########################################################
 #### zle functions and shortcuts (history search, etc) ####
 ###########################################################
-
-autoload -U zargs
+autoload -Uz zargs
 zle_highlight=('paste:none')
 
 function commandline-execute {
@@ -97,7 +93,9 @@ function commandline-execute {
 
 ######### Search for and goto git repository #############
 function _print-git-repo-name-and-status {
-    cd $@
+    DIR=$@
+    [[ $(basename $DIR) == ".git" ]] && DIR=$(dirname $DIR)
+    cd $DIR
     MOD=$(git status --untracked-files=no --short | cut -c1-3)
     NUM=$(echo $MOD | grep . | wc -l)
     if [ $NUM -eq 0 ]; then
@@ -117,27 +115,23 @@ function _print-git-repo-name-and-status {
         ST=" (??:$NUM)"
         ST="\e[0;31m$ST\e[0m"
     fi
-    print "$@\t${@/$HOME/\~}$ST"
+    print "$DIR\t${DIR/$HOME/\~}$ST"
 }
 function locate-git-repos {
-    locate --existing "/.git" | rg "/.git\$" | rg -v ".*/\..+/.+*" | while IFS= read -r p; do
-        [ -d "$p" ] && print $(dirname $p)
-    done
+    zargs -P 32 -I {} $(locate --existing "/.git" | rg "/.git\$" | rg -v ".*/\..+/.+*") -- dirname {}
 }
 function locate-git-repos-and-status {
-    zargs -P 32 -I {} $(locate-git-repos) -- _print-git-repo-name-and-status {}
+    zargs -P 32 -I {} $(locate --existing "/.git" | rg "/.git\$" | rg -v ".*/\..+/.+*") -- _print-git-repo-name-and-status {}
 }
 function _goto-git-repo {
     local REPORTTIME=-1
-    FILE=$(locate-git-repos-and-status | tac | fzf --exact --no-sort --cycle --ansi --no-mouse --with-nth=2.. | cut -f1) && [[ -d $FILE ]] && commandline-execute "cd $FILE"
+    FILE=$(locate-git-repos-and-status | tac | fzf --exact --no-sort --cycle --ansi --no-mouse --with-nth=2.. | cut -f1) && [ -d $FILE ] && commandline-execute "cd $FILE"
 }
 zle -N _goto-git-repo
 bindkey "^G" _goto-git-repo # goto git repo
 
 ####### Search-in-files -- search filenames and file contents, open accepted file in editor (at selected line) #######
 function _ls-files-git-with-status {
-        #ST=" (modified:$NUM)"
-        #ST="\e[0;31m$ST\e[0m"
     FILT="(^|/)\.?[^\.^/]+($|\.txt$)"
     GITROOTDIR=$(git rev-parse --show-toplevel 2>/dev/null) && \
     GITFILES=$(git ls-files $GITROOTDIR --exclude-standard | /bin/grep -Fxvf  <(git config --file .gitmodules --name-only --get-regexp path | cut -d '.' -f2-2) ) && \
