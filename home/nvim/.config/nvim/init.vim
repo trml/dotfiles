@@ -83,6 +83,7 @@ noremap <leader>ci :call ToggleComment()<CR>
 vnoremap <leader>cc :call Comment()<CR>gv
 vnoremap <leader>cu :call UnComment()<CR>gv
 vnoremap <leader>ci :call ToggleComment()<CR>gv
+let g:vimsyn_embed = 'lPr'
 
 set list listchars=tab:>·,extends:>,precedes:<,trail:¬,nbsp:█
 set cino=:0,l1,g0,(0,u0,W2s
