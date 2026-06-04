@@ -13,9 +13,15 @@ setopt prompt_subst
 unsetopt beep notify list_beep flow_control menu_complete
 bindkey -e
 typeset -A key
-HISTORY_IGNORE="(ls(|*)|cd(|*)|pwd|exit|whoami)"
 
 PROMPT='%F{cyan}%2~%F{red}$(git branch 2>/dev/null | grep "\*" | awk '\''{print " " $NF }'\'' | sed "s/)//g")%F{3}> %f'
+
+HISTORY_IGNORE="(ls(|*)|cd(|*)|pwd|exit|whoami)"
+zshaddhistory()
+{
+  emulate -L zsh
+  [[ $1 != ${~HISTORY_IGNORE} ]]
+}
 
 str_abbrev() {
     abbr="${1[1,$2]}.."              # abbreviate $1 to to $2 characters,
@@ -48,14 +54,14 @@ export TERM=xterm
 export LESS=Rx4
 export PATH=$PATH:~/.local/bin
 
-function ztrim() { sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' $@ }
+function ztrim() { sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' "$@" }
 
 alias git='noglob git'
 alias viless='/usr/share/nvim/runtime/scripts/less.sh'
 alias reswap='sudo /bin/swapoff -a && sudo /bin/swapon -a'
 alias ls='ls -AF --color=auto'
 alias sudo='sudo '
-alias sourcesh='source $HOME/.zshrc'
+alias sourcesh="source $HOME/.zshrc"
 alias vim='nvim'
 alias grep="/bin/rg"
 alias grem="/bin/rg --color ansi -g '*.{py,m,jl,sh,lua}'"
@@ -74,7 +80,7 @@ function locate() { /usr/bin/locate --database=$HOME/.locate.db $@ ; }
 zstyle ':completion:*' completer _expand _complete _ignored _correct _list _oldlist 
 zstyle ':completion:*' completions 1 glob 1 insert-unambiguous 1 rehash 1
 zstyle ':completion::complete:*' use-cache 1 cache-path $ZCACHE
-zstyle :compinstall filename '$HOME/.zshrc'
+zstyle :compinstall filename "$HOME/.zshrc"
 autoload -Uz compinit promptinit
 [[ -f /usr/share/fzf/completion.zsh ]] && source /usr/share/fzf/completion.zsh
 compinit -d $ZCACHE/.zcompdump-$ZSH_VERSION
@@ -93,8 +99,8 @@ function commandline-execute {
 
 ######### Search for and goto git repository #############
 function _print-git-repo-name-and-status {
-    DIR=$@
-    [[ "$(basename $DIR)" == ".git" ]] && DIR=$(dirname $DIR)
+    DIR="$@"
+    [[ $(basename "$DIR") == ".git" ]] && DIR=$(dirname "$DIR")
     cd $DIR
     MOD=$(git status --untracked-files=no --short | cut -c1-3)
     NUM=$(echo $MOD | grep . | wc -l)
@@ -118,10 +124,10 @@ function _print-git-repo-name-and-status {
     print "$DIR\t${DIR/$HOME/\~}$ST"
 }
 function locate-git-repos {
-    zargs -P 32 -I {} $(locate --existing "/.git" | rg "/.git\$" | rg -v "/\..*/|/_|_bak/|.bak/") -- dirname {}
+    zargs -P 32 -I {} -- $(locate --existing "/.git" | rg "/.git\$" | rg -v "/\..*/|/_|_bak/|.bak/") -- dirname {}
 }
 function locate-git-repos-and-status {
-    zargs -P 32 -I {} $(locate --existing "/.git" | rg "/.git\$" | rg -v "/\..*/|/_|_bak/|.bak/") -- _print-git-repo-name-and-status {}
+    zargs -P 32 -I {} -- $(locate --existing "/.git" | rg "/.git\$" | rg -v "/\..*/|/_|_bak/|.bak/") -- _print-git-repo-name-and-status {}
 }
 function _goto-git-repo {
     local REPORTTIME=-1
@@ -134,11 +140,11 @@ bindkey "^G" _goto-git-repo # goto git repo
 function _ls-files-git-with-status {
     FILT="(^|/)\.?[^\.^/]+($|\.txt$)"
     GITROOTDIR=$(git rev-parse --show-toplevel 2>/dev/null) && \
-	cd $GITROOTDIR && \
-    GITFILES=$(git ls-files $GITROOTDIR --exclude-standard | /bin/grep -Fxvf  <(git config --file .gitmodules --name-only --get-regexp path | cut -d '.' -f2-2) ) && \
+	cd "$GITROOTDIR" && \
+    GITFILES=$(git ls-files "$GITROOTDIR" --exclude-standard | /bin/grep -Fxvf  <(git config --file .gitmodules --name-only --get-regexp path | cut -d '.' -f2-2) ) && \
     GITFILES=$({ echo $GITFILES | /bin/rg -e $FILT ; echo $GITFILES | /bin/rg -ve $FILT}) && \
     MODIFIED=$(git status --untracked-files=no | grep -e "\t." | sed -E 's@\t(.*): *@  \\e[0;31m(\1)\\e[0m  @' | sort -r | uniq) && \
-    UNMODIFIED=$(/bin/grep -Fvxf <(git ls-files $GITROOTDIR --modified --exclude-standard) <(echo $GITFILES) | sed 's/^/    /' | tac) && \
+    UNMODIFIED=$(/bin/grep -Fvxf <(git ls-files "$GITROOTDIR" --modified --exclude-standard) <(echo $GITFILES) | sed 's/^/    /' | tac) && \
     {echo $MODIFIED ; echo $UNMODIFIED} | grep . --color=never
 }
 function _ls-files-git {
@@ -147,7 +153,7 @@ function _ls-files-git {
 function _search-and-edit-file-git {
     local REPORTTIME=-1
     FILE=$(_ls-files-git-with-status | fzf --no-sort --exact --cycle | awk -F ':' '{print $NF}' | tr -d ' ') && \
-    [[ -n $FILE ]] && commandline-execute "$EDITOR $FILE"
+    [[ -n "$FILE" ]] && commandline-execute "$EDITOR $FILE"
 }
 
 function _search-and-edit-line-git {
@@ -203,16 +209,14 @@ function _search-and-edit-line-git {
     FILE=$(echo $FR | awk 'NR==2{print $0}' | awk -F ':' '{print $1}' | awk '{print $NF}' | tr -d " ")
     LINE=$(echo $FR | awk 'NR==2{print $0}' | awk -F ':' '{print $2}' | tr -d " ")
     [ -z $FILE ] && return
-    if [[ $KEY == "enter" ]]; then
-        if [ -z $LINE ]; then
-            commandline-execute "$EDITOR $DIR/$FILE"
-        else
-            print -s "$EDITOR $DIR/$FILE"
-            commandline-execute " $EDITOR $DIR/$FILE +$LINE"
-        fi
-    else
+    if [[ $KEY != "enter" ]]; then
         zle kill-whole-line && zle -U $DIR/$FILE
-    fi
+	elif [ -z $LINE ]; then
+		commandline-execute "$EDITOR $DIR/$FILE"
+	else
+		print -s "$EDITOR $DIR/$FILE"
+		commandline-execute " $EDITOR $DIR/$FILE +$LINE"
+	fi
 }
 zle -N _search-and-edit-line-git
 bindkey "^F" _search-and-edit-line-git # search-in-files
@@ -258,10 +262,10 @@ function _zsh-background-init-fork {
 
 ZCACHE_LAST_BG_INIT=$ZSH/last_bg_init
 [ -f "$ZCACHE_LAST_BG_INIT" ] && LAST_BG_INIT=$(<$ZCACHE_LAST_BG_INIT)
-if [ -z "$LAST_BG_INIT" -o $(( $(date +%s) > $LAST_BG_INIT+3600 )) -eq 1 ]; then
+if [ -z "$LAST_BG_INIT" -o $(( $(date +%s) > "$LAST_BG_INIT"+3600 )) -eq 1 ]; then
     echo $(date +%s) > $ZCACHE_LAST_BG_INIT
     _zsh-background-init-fork > /dev/null 2>&1
 fi
 
 # activate python venv if exists
-[[ -d "~/.venv/venv" ]] && source ~/.venv/venv/bin/activate
+[[ -d ~/.venv/venv ]] && source ~/.venv/venv/bin/activate
