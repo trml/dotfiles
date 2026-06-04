@@ -1,7 +1,7 @@
 ZSH=$HOME/.zsh
 ZCACHE=$ZSH/cache
-[[ ! -d $ZSH ]] && mkdir $ZSH
-[[ ! -d $ZCACHE ]] && mkdir -p $ZCACHE
+[[ ! -d "$ZSH" ]] && mkdir $ZSH
+[[ ! -d "$ZCACHE" ]] && mkdir -p $ZCACHE
 
 HISTFILE=$ZSH/.histfile
 HISTSIZE=20000
@@ -9,7 +9,6 @@ SAVEHIST=$HISTSIZE
 
 setopt hist_ignore_all_dups hist_ignore_space appendhistory share_history
 setopt extendedglob nomatch completealiases interactivecomments always_to_end
-setopt autocd
 setopt prompt_subst
 unsetopt beep notify list_beep flow_control menu_complete
 bindkey -e
@@ -20,7 +19,7 @@ PROMPT='%F{cyan}%2~%F{red}$(git branch 2>/dev/null | grep "\*" | awk '\''{print 
 
 str_abbrev() {
     abbr="${1[1,$2]}.."              # abbreviate $1 to to $2 characters,
-    [ $#abbr -ge $#1 ] && print "$1" || print "$abbr" # return abbreviated if shorter than original
+    [ "$#abbr" -ge "$#1" ] && print "$1" || print "$abbr" # return abbreviated if shorter than original
 }
 
 if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
@@ -63,6 +62,7 @@ alias grem="/bin/rg --color ansi -g '*.{py,m,jl,sh,lua}'"
 alias grec="/bin/rg --color ansi -g '*.{c,h,cpp,hpp,rs,zig,nim}'"
 function greb() { /bin/rg -aPo --no-mmap --line-buffered --trim --column --color=never ".{0,60}$1.{0,60}" ${@:2} | while read -r line; do; echo $line | strings -w -s " " | ztrim; done }
 alias history='history 1'
+! command -v bat > /dev/null && command -v batcat > /dev/null && echo 'To use bat run "ln -s /usr/bin/batcat /usr/bin/bat"'
 
 [[ -f /etc/zsh_command_not_found ]] && source /etc/zsh_command_not_found
 
@@ -94,7 +94,7 @@ function commandline-execute {
 ######### Search for and goto git repository #############
 function _print-git-repo-name-and-status {
     DIR=$@
-    [[ $(basename $DIR) == ".git" ]] && DIR=$(dirname $DIR)
+    [[ "$(basename $DIR)" == ".git" ]] && DIR=$(dirname $DIR)
     cd $DIR
     MOD=$(git status --untracked-files=no --short | cut -c1-3)
     NUM=$(echo $MOD | grep . | wc -l)
@@ -118,14 +118,14 @@ function _print-git-repo-name-and-status {
     print "$DIR\t${DIR/$HOME/\~}$ST"
 }
 function locate-git-repos {
-    zargs -P 32 -I {} $(locate --existing "/.git" | rg "/.git\$" | rg -v "/\..*/|/_|/bak_|/bak\.|_bak/|.bak/") -- dirname {}
+    zargs -P 32 -I {} $(locate --existing "/.git" | rg "/.git\$" | rg -v "/\..*/|/_|_bak/|.bak/") -- dirname {}
 }
 function locate-git-repos-and-status {
-    zargs -P 32 -I {} $(locate --existing "/.git" | rg "/.git\$" | rg -v "/\..*/|/_|/bak_|/bak\.|_bak/|.bak/") -- _print-git-repo-name-and-status {}
+    zargs -P 32 -I {} $(locate --existing "/.git" | rg "/.git\$" | rg -v "/\..*/|/_|_bak/|.bak/") -- _print-git-repo-name-and-status {}
 }
 function _goto-git-repo {
     local REPORTTIME=-1
-    FILE=$(locate-git-repos-and-status | tac | fzf --exact --no-sort --cycle --ansi --no-mouse --with-nth=2.. | cut -f1) && [ -d $FILE ] && commandline-execute "cd $FILE"
+    FILE=$(locate-git-repos-and-status | sort | tac | fzf --exact --no-sort --cycle --ansi --no-mouse --with-nth=2.. | cut -f1) && [ -d "$FILE" ] && commandline-execute "cd $FILE"
 }
 zle -N _goto-git-repo
 bindkey "^G" _goto-git-repo # goto git repo
@@ -134,6 +134,7 @@ bindkey "^G" _goto-git-repo # goto git repo
 function _ls-files-git-with-status {
     FILT="(^|/)\.?[^\.^/]+($|\.txt$)"
     GITROOTDIR=$(git rev-parse --show-toplevel 2>/dev/null) && \
+	cd $GITROOTDIR && \
     GITFILES=$(git ls-files $GITROOTDIR --exclude-standard | /bin/grep -Fxvf  <(git config --file .gitmodules --name-only --get-regexp path | cut -d '.' -f2-2) ) && \
     GITFILES=$({ echo $GITFILES | /bin/rg -e $FILT ; echo $GITFILES | /bin/rg -ve $FILT}) && \
     MODIFIED=$(git status --untracked-files=no | grep -e "\t." | sed -E 's@\t(.*): *@  \\e[0;31m(\1)\\e[0m  @' | sort -r | uniq) && \
@@ -145,7 +146,7 @@ function _ls-files-git {
 }
 function _search-and-edit-file-git {
     local REPORTTIME=-1
-    FILE=$(_ls-files-git-with-status | fzf --exact --no-sort --cycle | awk -F ':' '{print $NF}' | tr -d ' ') && \
+    FILE=$(_ls-files-git-with-status | fzf --no-sort --exact --cycle | awk -F ':' '{print $NF}' | tr -d ' ') && \
     [[ -n $FILE ]] && commandline-execute "$EDITOR $FILE"
 }
 
@@ -154,29 +155,28 @@ function _search-and-edit-line-git {
     export TEMP=$(mktemp -u)
     trap 'rm -f "$TEMP"; unset TEMP2' EXIT
 
-    PREVIEW='FILE=$(echo {1} | awk '\''{print $NF}'\''); [ -z {2} ] && LINE=0 || LINE={2}; '
-    [ $(command -v bat) ] && PREVIEW=$PREVIEW' bat --color=always $FILE --highlight-line $LINE' || PREVIEW=$PREVIEW' less $FILE'
+	PREVIEW='FILE=$(echo {1} | awk '\''{print $NF}'\''); [ -z {2} ] && LINE=0 || LINE={2}; '
+    command -v bat > /dev/null && PREVIEW=$PREVIEW' bat --color=always $FILE --highlight-line $LINE' || PREVIEW=$PREVIEW' less $FILE'
 
     RG_CMD='rg --color=always --colors \"match:none\" --smart-case'
 
     DIR=$(git rev-parse --show-toplevel 2>/dev/null)
-    if [ -z $DIR ]; then
+    if [ -z "$DIR" ]; then
         DIR=$PWD
         #GET_FILES_IN_DIR='Q=%q; locate --existing --database=\$HOME/.locate.db \"\$PWD/*\$Q*\" | rg -v \"/[\\.|_]\" | while IFS= read -r line; do [[ -f \"\$line\" && ! -x \"\$line\" ]] && echo \"\$line\"; done'
         GET_FILES_IN_DIR='Q=%q ; fd -t f -i \"\$Q\" | '$RG_CMD' \"\$Q\"'
     else
-        cd $DIR
         export TEMP2=$(_ls-files-git-with-status)
         GET_FILES_IN_DIR='echo \$TEMP2 | '$RG_CMD' %q'
     fi
 
     TR_CHANGE='rg_pat={q:1}      # The first word is passed to ripgrep
     fzf_pat={q:1..}   # The rest are passed to fzf
-    if ! [[ -r "$TEMP" ]] || [[ $rg_pat != $(cat "$TEMP") ]]; then
+    if ! [[ -r "$TEMP" ]] || [[ "$rg_pat" != $(cat "$TEMP") ]]; then
         echo "$rg_pat" > "$TEMP"
         if [ ! -z "$rg_pat" ]; then
             printf "+reload:sleep 0.1; { '$GET_FILES_IN_DIR' ; '$RG_CMD' --column --line-number --no-heading --sort-files %q } || true;" "$rg_pat" "$rg_pat"
-        elif [ ! -z $(git rev-parse --show-toplevel 2>/dev/null) ]; then
+        elif [ ! -z "$(git rev-parse --show-toplevel 2>/dev/null)" ]; then
             printf "+reload:sleep 0.1; { '$GET_FILES_IN_DIR' } || true;" "$rg_pat"
         else
             printf "+reload:sleep 0.1; echo \":not a git repo: \"$PWD ;"
@@ -257,11 +257,11 @@ function _zsh-background-init-fork {
 }
 
 ZCACHE_LAST_BG_INIT=$ZSH/last_bg_init
-[ -f $ZCACHE_LAST_BG_INIT ] && LAST_BG_INIT=$(<$ZCACHE_LAST_BG_INIT)
-if [ -z $LAST_BG_INIT -o $(( $(date +%s) > $LAST_BG_INIT+3600 )) -eq 1 ]; then
+[ -f "$ZCACHE_LAST_BG_INIT" ] && LAST_BG_INIT=$(<$ZCACHE_LAST_BG_INIT)
+if [ -z "$LAST_BG_INIT" -o $(( $(date +%s) > $LAST_BG_INIT+3600 )) -eq 1 ]; then
     echo $(date +%s) > $ZCACHE_LAST_BG_INIT
     _zsh-background-init-fork > /dev/null 2>&1
 fi
 
 # activate python venv if exists
-[[ -d ~/.venv/venv ]] && source ~/.venv/venv/bin/activate
+[[ -d "~/.venv/venv" ]] && source ~/.venv/venv/bin/activate
