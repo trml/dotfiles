@@ -85,9 +85,10 @@ vnoremap <leader>cu :call UnComment()<CR>gv
 vnoremap <leader>ci :call ToggleComment()<CR>gv
 let g:vimsyn_embed = 'lPr'
 
-set list listchars=tab:>·,extends:>,precedes:<,trail:¬,nbsp:█
+"set list listchars=tab:>·,extends:>,precedes:<,trail:¬,nbsp:█
+set list listchars=tab:\ \ ,extends:>,precedes:<,trail:¬,nbsp:█
 set cino=:0,l1,g0,(0,u0,W2s
-set sw=4 ts=4 sts=0 expandtab
+autocmd Filetype * set sw=4 ts=4 sts=4 noexpandtab
 autocmd Filetype c,cpp,h,hpp,matlab,octave setlocal ts=4 sw=4 sts=0 expandtab
 autocmd Filetype rust,rs,python,musicxml,xml,nim,julia,lua,zig,rust,java,kotlin,js,ts setlocal ts=4 sw=4 sts=0 expandtab
 
