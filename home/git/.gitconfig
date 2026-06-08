@@ -1,10 +1,18 @@
 [alias]
-	hist = log --pretty=format:'%C(yellow)%h %C(cyan)%ad %C(reset)| %s%d %C(green)[%an]' --abbrev=11 --date=short --graph --no-merges
-	branches = for-each-ref --sort='-authordate:iso8601' --count=35 --format=' %(color:cyan)%(authordate:relative)%09%(color:white)%(refname:short)' refs/heads
+	;hist = log --pretty=format:'%C(yellow)%h %C(cyan)%ad %C(reset)| %s%d %C(green)[%an]' --abbrev=11 --date=short --graph --no-merges
+	hist = log --pretty=format:'%C(green)[%h] %C(yellow)[%ad]%C(reset) | %C(cyan)%s%C(auto)%d %C(white)[%an]%C(reset)' --abbrev=9 --graph --date=short --no-merges
+	branches = for-each-ref --exclude='refs/tags/*' --exclude='refs/remotes/**/*' --sort='-authordate:iso8601' --count=35 --format=' %(align:24)%(authordate:relative)%(end) %(refname:short)' refs
+	branches-all = for-each-ref --sort='-authordate:iso8601' --format=' %(align:24)%(authordate:relative)%(end) %(refname:short)' refs
+	ref = reflog --pretty=format:'%C(green)[%h] %C(yellow)[%cs] %C(brightblue)%gd %C(cyan)%gs %C(auto)%d' --abbrev=9
 [push]
 	default = simple
 [color]
-	diff = always
+	diff = auto
+	status = auto
+	branch = auto
+	interactive = auto
+	ui = auto
+	pager = true
 [core]
 	pager = less --tabs=4
 	;pager = diff-so-fancy | less --tabs=4
@@ -12,14 +20,14 @@
 	wsErrorHighlight = all
 [color "diff"]
 	whitespace = "red reverse"
-;[pager]
+[pager]
+	;diff = git diff --color=always | sed -E "s/\\(.*\\)+/\\\\1/" | less -R --tabs=4
+	;diff = git diff --color | sed -E "s/^-//" | less -R --tabs=4
+	;diff = git diff --color | sed -E "s/^([^-+]*)[-+ ]/\\1/" | less -R --tabs=4
 	;diff = git diff --color-words | less -R --tabs=4 ; piping git diff to git diff to get --color-words
 	;diff = git diff --color-words='[^[:space:]_]+|[^[:space:]]_[:space:]]+|[[:space:]+]' --word-diff=plain | less -R --tabs=4 ; piping git diff to git diff to get --color-words
 	;diff = git diff --color-words='[^[:space:]+]+|:space:*' | less -R --tabs=4 ; piping git diff to git diff to get --color-words
 	;diff = git diff --color-words='.*' | less -R --tabs=4 ; piping git diff to git diff to get --color-words
-[color]
-	diff = auto
-	ui = auto
 [diff-so-fancy]
 	useUnicodeRuler = false
 	rulerWidth = 47

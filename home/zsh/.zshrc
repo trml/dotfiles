@@ -63,12 +63,13 @@ alias ls='ls -AF --color=auto'
 alias sudo='sudo '
 alias sourcesh="source $HOME/.zshrc"
 alias vim='nvim'
-alias grep="/bin/rg"
-alias grem="/bin/rg --color ansi -g '*.{py,m,jl,sh,lua}'"
-alias grec="/bin/rg --color ansi -g '*.{c,h,cpp,hpp,rs,zig,nim}'"
+alias grep="/bin/rg --no-heading"
+alias grem="/bin/rg --no-heading --color ansi -g '*.{py,m,jl,sh,lua}'"
+alias grec="/bin/rg --no-heading --color ansi -g '*.{c,h,cpp,hpp,rs,zig,nim}'"
 function greb() { /bin/rg -aPo --no-mmap --line-buffered --trim --column --color=never ".{0,60}$1.{0,60}" ${@:2} | while read -r line; do; echo $line | strings -w -s " " | ztrim; done }
 alias history='history 1'
 ! command -v bat > /dev/null && command -v batcat > /dev/null && echo 'To use bat run "ln -s /usr/bin/batcat /usr/bin/bat"'
+! command -v fd > /dev/null && command -v fdfind > /dev/null && echo 'To use fd run "ln -s /usr/bin/fdfind /usr/bin/fd"'
 
 [[ -f /etc/zsh_command_not_found ]] && source /etc/zsh_command_not_found
 
@@ -136,6 +137,12 @@ function _goto-git-repo {
 zle -N _goto-git-repo
 bindkey "^G" _goto-git-repo # goto git repo
 
+function _test {
+	echo $BUFFER
+}
+zle -N _test
+bindkey "^T" _test
+
 ####### Search-in-files -- search filenames and file contents, open accepted file in editor (at selected line) #######
 function _ls-files-git-with-status {
     FILT="(^|/)\.?[^\.^/]+($|\.txt$)"
@@ -144,7 +151,7 @@ function _ls-files-git-with-status {
     GITFILES=$(git ls-files "$GITROOTDIR" --exclude-standard | /bin/grep -Fxvf  <(git config --file .gitmodules --name-only --get-regexp path | cut -d '.' -f2-2) ) && \
     GITFILES=$({ echo $GITFILES | /bin/rg -e $FILT ; echo $GITFILES | /bin/rg -ve $FILT}) && \
     MODIFIED=$(git status --untracked-files=no | grep -e "\t." | sed -E 's@\t(.*): *@  \\e[0;31m(\1)\\e[0m  @' | sort -r | uniq) && \
-    UNMODIFIED=$(/bin/grep -Fvxf <(git ls-files "$GITROOTDIR" --modified --exclude-standard) <(echo $GITFILES) | sed 's/^/    /' | tac) && \
+    UNMODIFIED=$(/bin/grep -Fvxf <(echo $MODIFIED | awk '{print $NF}') <(echo $GITFILES) | sed 's/^/    /' | tac) && \
     {echo $MODIFIED ; echo $UNMODIFIED} | grep . --color=never
 }
 function _ls-files-git {
@@ -160,62 +167,79 @@ function _search-and-edit-line-git {
     local REPORTTIME=-1
     export TEMP=$(mktemp -u)
     trap 'rm -f "$TEMP"; unset TEMP2' EXIT
-
-	PREVIEW='FILE=$(echo {1} | awk '\''{print $NF}'\''); [ -z {2} ] && LINE=0 || LINE={2}; '
+	PREVIEW='FILE='$DIR'/$(echo {1} | awk '\''{print $NF}'\''); [ -z {2} ] && LINE=0 || LINE={2}; '
     command -v bat > /dev/null && PREVIEW=$PREVIEW' bat --color=always $FILE --highlight-line $LINE' || PREVIEW=$PREVIEW' less $FILE'
 
     RG_CMD='rg --color=always --colors \"match:none\" --smart-case'
-
     DIR=$(git rev-parse --show-toplevel 2>/dev/null)
     if [ -z "$DIR" ]; then
-        DIR=$PWD
+		DIR=$PWD
         #GET_FILES_IN_DIR='Q=%q; locate --existing --database=\$HOME/.locate.db \"\$PWD/*\$Q*\" | rg -v \"/[\\.|_]\" | while IFS= read -r line; do [[ -f \"\$line\" && ! -x \"\$line\" ]] && echo \"\$line\"; done'
-        GET_FILES_IN_DIR='Q=%q ; fd -t f -i \"\$Q\" | '$RG_CMD' \"\$Q\"'
+        GET_FILES_IN_DIR=$CD_CMD'; Q=%q ; fd -t f -i \"\$Q\" | '$RG_CMD' \"\$Q\"'
     else
         export TEMP2=$(_ls-files-git-with-status)
         GET_FILES_IN_DIR='echo \$TEMP2 | '$RG_CMD' %q'
     fi
 
-    TR_CHANGE='rg_pat={q:1}      # The first word is passed to ripgrep
-    fzf_pat={q:1..}   # The rest are passed to fzf
-    if ! [[ -r "$TEMP" ]] || [[ "$rg_pat" != $(cat "$TEMP") ]]; then
-        echo "$rg_pat" > "$TEMP"
-        if [ ! -z "$rg_pat" ]; then
-            printf "+reload:sleep 0.1; { '$GET_FILES_IN_DIR' ; '$RG_CMD' --column --line-number --no-heading --sort-files %q } || true;" "$rg_pat" "$rg_pat"
-        elif [ ! -z "$(git rev-parse --show-toplevel 2>/dev/null)" ]; then
-            printf "+reload:sleep 0.1; { '$GET_FILES_IN_DIR' } || true;" "$rg_pat"
-        else
-            printf "+reload:sleep 0.1; echo \":not a git repo: \"$PWD ;"
-        fi
-    fi
-    echo "+search:$fzf_pat"'
+	#fd_pat = $(echo $fd_pat | sed "s/ /|/g")
+	if [[ $BUFFER == "cd"* ]]; then
+		CMD="cd"
+		DIR=$PWD
+		TR_CHANGE='fd_pat={q:1..}
+		printf "+reload:sleep 0.01;"
+		[ -z \"{q:1}\" ] && printf "+reload:sleep 0.01; fd -t d -i %q" "$fd_pat" || echo "+reload:sleep 0.01; fd -t d"
+		echo "+search:"'
+		FR=$(fzf --ansi --exact --smart-case --cycle --no-sort --no-mouse \
+			--with-shell 'zsh -c' \
+			--expect=ctrl-e,enter \
+			--bind 'start,change:transform:'$TR_CHANGE
+		)
+		KEY=$(echo $FR | awk 'NR==1{print $1}' | tr -d " ")
+		FILE=$(echo $FR | awk 'NR==2{print $0}' | tr -d " ")
+	else
+		CMD=$EDITOR
+		TR_CHANGE='rg_pat={q:1}      # The first word is passed to ripgrep
+		fzf_pat={q:1..}   # The rest are passed to fzf
+		if ! [[ -r "$TEMP" ]] || [[ "$rg_pat" != $(cat "$TEMP") ]]; then
+			echo "$rg_pat" > "$TEMP"
+			if [ ! -z "$rg_pat" ]; then
+				printf "+reload:sleep 0.1; { '$GET_FILES_IN_DIR' ; cd '$DIR'; '$RG_CMD' --column --line-number --no-heading --sort-files %q } || true;" "$rg_pat" "$rg_pat"
+			elif [ ! -z "$(git rev-parse --show-toplevel 2>/dev/null)" ]; then
+				printf "+reload:sleep 0.1; { '$GET_FILES_IN_DIR' } || true;" "$rg_pat"
+			else
+				printf "+reload:sleep 0.1; echo \":not a git repo: \"$PWD ;"
+			fi
+		fi
+		echo "+search:$fzf_pat"'
 
-    TR_RESIZE='if (( FZF_LINES > 18 && (FZF_COLUMNS < 5*FZF_LINES || FZF_COLUMNS <= 150) )); then; echo "change-preview-window:up,50%,border-bottom"
-    elif (( FZF_COLUMNS > 150 )); then; echo "change-preview-window:right,50%,border-left";
-    else echo "+change-preview-window:hidden"; fi'
+		TR_RESIZE='if (( FZF_LINES > 18 && (FZF_COLUMNS < 5*FZF_LINES || FZF_COLUMNS <= 150) )); then; echo "change-preview-window:up,50%,border-bottom"
+		elif (( FZF_COLUMNS > 150 )); then; echo "change-preview-window:right,50%,border-left";
+		else echo "+change-preview-window:hidden"; fi'
 
-    FR=$(fzf --ansi --exact --smart-case --cycle --no-sort --no-mouse \
-        --color "hl:-1:underline:bold,hl+:-1:underline:reverse" \
-        --with-shell 'zsh -c' \
-        --preview $PREVIEW \
-        --preview-window 'hidden,+{2}+3/3,~3' \
-        --bind 'start,change:transform:'$TR_CHANGE \
-        --bind 'focus,resize:transform:'$TR_RESIZE \
-        --nth -1 \
-        --expect=ctrl-e,enter \
-        --delimiter : \
-    )
-    KEY=$(echo $FR | awk 'NR==1{print $1}' | tr -d " ")
-    FILE=$(echo $FR | awk 'NR==2{print $0}' | awk -F ':' '{print $1}' | awk '{print $NF}' | tr -d " ")
-    LINE=$(echo $FR | awk 'NR==2{print $0}' | awk -F ':' '{print $2}' | tr -d " ")
-    [ -z $FILE ] && return
-    if [[ $KEY != "enter" ]]; then
-        zle kill-whole-line && zle -U $DIR/$FILE
+		FR=$(fzf --ansi --exact --smart-case --cycle --no-sort --no-mouse \
+			--color "hl:-1:underline:bold,hl+:-1:underline:reverse" \
+			--with-shell 'zsh -c' \
+			--preview $PREVIEW \
+			--preview-window 'hidden,+{2}+3/3,~3' \
+			--bind 'start,change:transform:'$TR_CHANGE \
+			--bind 'focus,resize:transform:'$TR_RESIZE \
+			--nth -1 \
+			--expect=ctrl-e,enter \
+			--delimiter : \
+		)
+		KEY=$(echo $FR | awk 'NR==1{print $1}' | tr -d " ")
+		FILE=$(echo $FR | awk 'NR==2{print $0}' | awk -F ':' '{print $1}' | awk '{print $NF}' | tr -d " ")
+		LINE=$(echo $FR | awk 'NR==2{print $0}' | awk -F ':' '{print $2}' | tr -d " ")
+	fi
+	[ -z $FILE ] && return
+	FILE=$DIR/$FILE
+	if [[ $KEY != "enter" ]]; then
+		zle kill-whole-line && zle -U $FILE
 	elif [ -z $LINE ]; then
-		commandline-execute "$EDITOR $DIR/$FILE"
+		commandline-execute "$CMD $FILE"
 	else
 		print -s "$EDITOR $DIR/$FILE"
-		commandline-execute " $EDITOR $DIR/$FILE +$LINE"
+		commandline-execute " $CMD $FILE +$LINE"
 	fi
 }
 zle -N _search-and-edit-line-git
