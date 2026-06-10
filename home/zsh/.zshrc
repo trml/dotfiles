@@ -150,12 +150,6 @@ function _goto-git-repo {
 zle -N _goto-git-repo
 bindkey "^G" _goto-git-repo # goto git repo
 
-function _test {
-	echo $BUFFER
-}
-zle -N _test
-bindkey "^T" _test
-
 ####### Search-in-files -- search filenames and file contents, open accepted file in editor (at selected line) #######
 function _ls-files-git-with-status {
     FILT="(^|/)\.?[^\.^/]+($|\.txt$)"
