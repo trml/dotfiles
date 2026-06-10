@@ -17,9 +17,10 @@ set suffixes-=.h,.obj
 
 set showmatch ignorecase hlsearch incsearch showcmd nofoldenable
 set wildmode=longest,list
-setlocal formatoptions-=t,c
+setlocal formatoptions-=cro
+autocmd BufEnter * setlocal formatoptions-=cro
 if has('nvim')
-	lua vim.api.nvim_create_autocmd("FileType", { callback = function() vim.opt_local.formatoptions:remove("c") end, })
+	lua vim.api.nvim_create_autocmd("FileType", { callback = function() vim.opt_local.formatoptions:remove({"c","r","o"}) end, })
 endif
 
 set viewoptions=cursor,folds,slash,unix
@@ -122,3 +123,6 @@ set background=dark
 
 set cursorline
 set cursorlineopt=line
+
+set exrc
+set secure
