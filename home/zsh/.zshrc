@@ -13,10 +13,11 @@ setopt prompt_subst
 unsetopt beep notify list_beep flow_control menu_complete
 bindkey -e
 typeset -A key
+bindkey -s " " " "
 
 PROMPT='%F{cyan}%2~%F{red}$(git branch 2>/dev/null | grep "\*" | awk '\''{print " " $NF }'\'' | sed "s/)//g")%F{3}> %f'
 
-HISTORY_IGNORE="(ls(|*)|cd(|*)|pwd|exit|whoami)"
+HISTORY_IGNORE="(ls(|*)|cd(|*)|pwd|exit|whoami|vim * +*)"
 zshaddhistory()
 {
   emulate -L zsh
@@ -40,7 +41,7 @@ export SSH_AUTH_SOCK=
 #fi
 
 if [[ "$XDG_CURRENT_DESKTOP" == *"GNOME" ]]; then
-    dconf write /org/gnome/desktop/input-sources/xkb-options "['caps:escape']"
+    dconf write /org/gnome/desktop/input-sources/xkb-options "['caps:escape', 'nbsp:none']"
     dconf write /org/gnome/desktop/interface/enable-animations "false"
     dconf write /org/gnome/desktop/search-provider/disable-external "true"
     dconf write /org/gnome/SessionManager/logout-prompt "false"
@@ -96,6 +97,18 @@ zle_highlight=('paste:none')
 function commandline-execute {
     BUFFER="$@"
     zle accept-line
+}
+
+function relativepath {
+	file="${1:a}"
+	[[ "$#"  == "2" ]] && ref="${2:a}" || ref="${PWD:a}"
+	file=(${(@s:/:)file})
+	ref=(${(@s:/:)ref})
+	while [[ $file && $ref && ${file[1]} == ${ref[1]} ]]; do
+		file=(${file[2,-1]})
+		ref=(${ref[2,-1]})
+	done
+	echo $(repeat ${#ref} printf "../")${(j:/:)file}
 }
 
 ######### Search for and goto git repository #############
@@ -170,15 +183,15 @@ function _search-and-edit-line-git {
 	PREVIEW='FILE='$DIR'/$(echo {1} | awk '\''{print $NF}'\''); [ -z {2} ] && LINE=0 || LINE={2}; '
     command -v bat > /dev/null && PREVIEW=$PREVIEW' bat --color=always $FILE --highlight-line $LINE' || PREVIEW=$PREVIEW' less $FILE'
 
-    RG_CMD='rg --color=always --colors \"match:none\" --smart-case'
+    RG_CMD='/usr/bin/rg -F --color=always --colors \"match:none\" --smart-case'
     DIR=$(git rev-parse --show-toplevel 2>/dev/null)
     if [ -z "$DIR" ]; then
 		DIR=$PWD
         #GET_FILES_IN_DIR='Q=%q; locate --existing --database=\$HOME/.locate.db \"\$PWD/*\$Q*\" | rg -v \"/[\\.|_]\" | while IFS= read -r line; do [[ -f \"\$line\" && ! -x \"\$line\" ]] && echo \"\$line\"; done'
-        GET_FILES_IN_DIR=$CD_CMD'; Q=%q ; fd -t f -i \"\$Q\" | '$RG_CMD' \"\$Q\"'
+        GET_FILES_IN_DIR=$CD_CMD'; Q=$rg_pat; fd -t f -i \"\$Q\" | '$RG_CMD' \"\$Q\"'
     else
         export TEMP2=$(_ls-files-git-with-status)
-        GET_FILES_IN_DIR='echo \$TEMP2 | '$RG_CMD' %q'
+        GET_FILES_IN_DIR='echo \$TEMP2 | '$RG_CMD' $rg_pat '
     fi
 
 	#fd_pat = $(echo $fd_pat | sed "s/ /|/g")
@@ -196,18 +209,21 @@ function _search-and-edit-line-git {
 		)
 		KEY=$(echo $FR | awk 'NR==1{print $1}' | tr -d " ")
 		FILE=$(echo $FR | awk 'NR==2{print $0}' | tr -d " ")
+		LINE=
 	else
 		CMD=$EDITOR
 		TR_CHANGE='rg_pat={q:1}      # The first word is passed to ripgrep
 		fzf_pat={q:1..}   # The rest are passed to fzf
+		rg_pat=${(q)rg_pat}
+		[[ {q} != *[[:space:]]* ]] && fzf_pat=$rg_pat
 		if ! [[ -r "$TEMP" ]] || [[ "$rg_pat" != $(cat "$TEMP") ]]; then
 			echo "$rg_pat" > "$TEMP"
 			if [ ! -z "$rg_pat" ]; then
-				printf "+reload:sleep 0.1; { '$GET_FILES_IN_DIR' ; cd '$DIR'; '$RG_CMD' --column --line-number --no-heading --sort-files %q } || true;" "$rg_pat" "$rg_pat"
+				echo "+reload:sleep 0.050; { cd '$DIR'; '$RG_CMD' --column --line-number --no-heading --sort-files $rg_pat } || true;"
 			elif [ ! -z "$(git rev-parse --show-toplevel 2>/dev/null)" ]; then
-				printf "+reload:sleep 0.1; { '$GET_FILES_IN_DIR' } || true;" "$rg_pat"
+				echo "+reload:sleep 0.010; { '$GET_FILES_IN_DIR' } || true;"
 			else
-				printf "+reload:sleep 0.1; echo \":not a git repo: \"$PWD ;"
+				echo "+reload:sleep 0.010; echo \":not a git repo: \"$PWD ;"
 			fi
 		fi
 		echo "+search:$fzf_pat"'
@@ -232,14 +248,16 @@ function _search-and-edit-line-git {
 		LINE=$(echo $FR | awk 'NR==2{print $0}' | awk -F ':' '{print $2}' | tr -d " ")
 	fi
 	[ -z $FILE ] && return
-	FILE=$DIR/$FILE
+	FILE=$(relativepath $DIR/$FILE)
 	if [[ $KEY != "enter" ]]; then
 		zle kill-whole-line && zle -U $FILE
-	elif [ -z $LINE ]; then
-		commandline-execute "$CMD $FILE"
 	else
-		print -s "$EDITOR $DIR/$FILE"
-		commandline-execute " $CMD $FILE +$LINE"
+		if [ -z $LINE ]; then
+			commandline-execute "$CMD $FILE"
+		else
+			#print -s "$CMD $FILE"
+			commandline-execute " $CMD $FILE +$LINE"
+		fi
 	fi
 }
 zle -N _search-and-edit-line-git
