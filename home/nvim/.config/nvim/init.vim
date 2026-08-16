@@ -72,12 +72,12 @@ EOF
 
 let b:ccl = '#'
 autocmd FileType python,julia,nim let b:ccl = '#'
-autocmd FileType c,cpp,h,hpp,java,scala,php,javascript,js,ts,jsx,tsx,kotlin,zig,rust let b:ccl = '//'
+autocmd FileType c,cpp,h,hpp,java,scala,php,javascript,js,ts,jsx,tsx,javascript,typescript,kotlin,zig,rust let b:ccl = '//'
 autocmd FileType matlab,tex,bib,octave let b:ccl = '% '
 autocmd FileType vim let b:ccl = '"'
 autocmd FileType markdown let b:ccl = '<---'
 autocmd FileType lua let b:ccl = '--'
-autocmd FileType lisp,gitconfig let b:ccl = ';'
+autocmd FileType lisp,gitconfig,dosini let b:ccl = ';'
 function! Comment()
 	exe "s@^\\s*\\zs@".b:ccl."@"
 endfun
@@ -100,7 +100,7 @@ set cino=:0,l1,g0,(0,u0,W2s
 set sw=4 ts=4 sts=4 noexpandtab
 autocmd Filetype * set sw=4 ts=4 sts=4 noexpandtab
 autocmd Filetype c,cpp,h,hpp,matlab,octave setlocal ts=4 sw=4 sts=0 expandtab
-autocmd Filetype rust,rs,python,nim,julia,lua,zig,rust,java,kotlin,js,ts setlocal ts=4 sw=4 sts=0 expandtab
+autocmd Filetype rust,rs,python,nim,julia,lua,zig,rust,java,kotlin,js,ts,javascript,typescript setlocal ts=4 sw=4 sts=0 expandtab
 
 filetype plugin indent on
 syntax enable

@@ -78,6 +78,13 @@ function updatedb() { /usr/bin/updatedb --require-visibility 0 -o $HOME/.locate.
 function pacfiles() { pacman -Qlq $@ | grep -v '/$' | xargs -r du -h | sort -h ; }
 function locate() { /usr/bin/locate --database=$HOME/.locate.db $@ ; }
 
+function showmb()
+{
+    ps -eo size,pid,user,command --sort -size | \
+    awk '{ printf("%13.2f ",$1/1024) } { for ( x=4 ; x<=NF ; x++ ) { printf("%s ",$x) } print "" }' |\
+    cut -d "" -f2 | cut -d "-" -f1
+}
+
 # enable completion
 zstyle ':completion:*' completer _expand _complete _ignored _correct _list _oldlist 
 zstyle ':completion:*' completions 1 glob 1 insert-unambiguous 1 rehash 1
@@ -87,6 +94,9 @@ autoload -Uz compinit promptinit
 [[ -f /usr/share/fzf/completion.zsh ]] && source /usr/share/fzf/completion.zsh
 compinit -d $ZCACHE/.zcompdump-$ZSH_VERSION
 promptinit
+
+autoload -U select-word-style
+select-word-style bash
 
 ###########################################################
 #### zle functions and shortcuts (history search, etc) ####
@@ -207,14 +217,14 @@ function _search-and-edit-line-git {
 	else
 		CMD=$EDITOR
 		TR_CHANGE='rg_pat={q:1}      # The first word is passed to ripgrep
-		fzf_pat={q:1..}   # The rest are passed to fzf
+		fzf_pat={q}   # The rest are passed to fzf
+		[[ -n "$fzf_pat" && "$fzf_pat" == "$rg_pat" ]] && fzf_pat=${(q)fzf_pat}
 		rg_pat=${(q)rg_pat}
-		[[ {q} != *[[:space:]]* ]] && fzf_pat=$rg_pat
 		if ! [[ -r "$TEMP" ]] || [[ "$rg_pat" != $(cat "$TEMP") ]]; then
 			echo "$rg_pat" > "$TEMP"
-			if [ ! -z "$rg_pat" ]; then
-				echo "+reload:sleep 0.050; { cd '$DIR'; '$RG_CMD' --column --line-number --no-heading --sort-files $rg_pat } || true;"
-			elif [ ! -z "$(git rev-parse --show-toplevel 2>/dev/null)" ]; then
+			if [ -n "$fzf_pat" ]; then
+				echo "+reload:sleep 0.050; { '$GET_FILES_IN_DIR' ; cd '$DIR'; '$RG_CMD' --column --line-number --no-heading --sort-files $rg_pat } || true;"
+			elif [ -n "$(git rev-parse --show-toplevel 2>/dev/null)" ]; then
 				echo "+reload:sleep 0.010; { '$GET_FILES_IN_DIR' } || true;"
 			else
 				echo "+reload:sleep 0.010; echo \":not a git repo: \"$PWD ;"
