@@ -7,6 +7,8 @@ HISTFILE=$ZSH/.histfile
 HISTSIZE=20000
 SAVEHIST=$HISTSIZE
 
+LOCATE_DB=$HOME/.locate.db
+
 setopt hist_ignore_all_dups hist_ignore_space appendhistory share_history
 setopt extendedglob nomatch completealiases interactivecomments always_to_end
 setopt prompt_subst
@@ -15,9 +17,9 @@ bindkey -e
 typeset -A key
 bindkey -s " " " "
 
-PROMPT='%F{cyan}%2~%F{red}$(git branch 2>/dev/null | grep "\*" | awk '\''{print " " $NF }'\'' | sed "s/)//g")%F{3}> %f'
+PROMPT='%F{cyan}%2~%F{red}$(git branch 2>/dev/null | rg "\*" | awk '\''{print " " $NF }'\'' | sed "s/)//g")%F{3}> %f'
 
-HISTORY_IGNORE="(ls(|*)|cd(|*)|pwd|exit|whoami|vim * +*)"
+HISTORY_IGNORE="(ls(|*)|cd(|*)|pwd|exit|whoami|vim * +*|nvim * +*)"
 zshaddhistory()
 {
   emulate -L zsh
@@ -64,19 +66,33 @@ alias ls='ls -AF --color=auto'
 alias sudo='sudo '
 alias sourcesh="source $HOME/.zshrc"
 alias vim='nvim'
-alias grep="/bin/rg --no-heading"
-alias grem="/bin/rg --no-heading --color ansi -g '*.{py,m,jl,sh,lua}'"
-alias grec="/bin/rg --no-heading --color ansi -g '*.{c,h,cpp,hpp,rs,zig,nim}'"
-function greb() { /bin/rg -aPo --no-mmap --line-buffered --trim --column --color=never ".{0,60}$1.{0,60}" ${@:2} | while read -r line; do; echo $line | strings -w -s " " | ztrim; done }
+alias grep="rg --no-heading"
+alias grem="rg --no-heading --color ansi -g '*.{py,m,jl,sh,lua}'"
+alias grec="rg --no-heading --color ansi -g '*.{c,h,cpp,hpp,rs,zig,nim}'"
+function greb() { rg -aPo --no-mmap --line-buffered --trim --column --color=never ".{0,60}$1.{0,60}" ${@:2} | while read -r line; do; echo $line | strings -w -s " " | ztrim; done }
 alias history='history 1'
 ! command -v bat > /dev/null && command -v batcat > /dev/null && echo 'To use bat run "ln -s /usr/bin/batcat /usr/bin/bat"'
 ! command -v fd > /dev/null && command -v fdfind > /dev/null && echo 'To use fd run "ln -s /usr/bin/fdfind /usr/bin/fd"'
 
 [[ -f /etc/zsh_command_not_found ]] && source /etc/zsh_command_not_found
 
-function updatedb() { /usr/bin/updatedb --require-visibility 0 -o $HOME/.locate.db --prune-bind-mounts no ; }
-function pacfiles() { pacman -Qlq $@ | grep -v '/$' | xargs -r du -h | sort -h ; }
-function locate() { /usr/bin/locate --database=$HOME/.locate.db $@ ; }
+function updatedb()
+{
+	/usr/bin/updatedb --require-visibility 0 -o $LOCATE_DB --prune-bind-mounts no
+}
+function pacfiles()
+{
+	if (( $# > 0 )); then
+		pacman -Qlq $@ | grep -v '/$' | xargs -r du -h | sort -h
+	else
+		echo "error: specify at least one package"
+		return 1
+	fi
+}
+function locate()
+{
+	/usr/bin/locate --database=$LOCATE_DB $@
+}
 
 function showmb()
 {
@@ -126,8 +142,8 @@ function _print-git-repo-name-and-status {
     DIR="$@"
     [[ $(basename "$DIR") == ".git" ]] && DIR=$(dirname "$DIR")
     cd $DIR
-    MOD=$(git status --untracked-files=no --short | cut -c1-3)
-    NUM=$(echo $MOD | grep . | wc -l)
+    MOD=$(git status --untracked-files=no --ignore-submodules=all --short | cut -c1-3)
+    NUM=$(echo $MOD | rg . | wc -l)
     if [ $NUM -eq 0 ]; then
         if [ $(git log --branches --not --remotes | wc -l) -gt 0 ]; then
             ST=" (unpushed)"
@@ -161,15 +177,16 @@ zle -N _goto-git-repo
 bindkey "^G" _goto-git-repo # goto git repo
 
 ####### Search-in-files -- search filenames and file contents, open accepted file in editor (at selected line) #######
+
 function _ls-files-git-with-status {
     FILT="(^|/)\.?[^\.^/]+($|\.txt$)"
     GITROOTDIR=$(git rev-parse --show-toplevel 2>/dev/null) && \
 	cd "$GITROOTDIR" && \
-    GITFILES=$(git ls-files "$GITROOTDIR" --exclude-standard | /bin/grep -Fxvf  <(git config --file .gitmodules --name-only --get-regexp path | cut -d '.' -f2-2) ) && \
-    GITFILES=$({ echo $GITFILES | /bin/rg -e $FILT ; echo $GITFILES | /bin/rg -ve $FILT}) && \
-    MODIFIED=$(git status --untracked-files=no | grep -e "\t." | sed -E 's@\t(.*): *@  \\e[0;31m(\1)\\e[0m  @' | sort -r | uniq) && \
-    UNMODIFIED=$(/bin/grep -Fvxf <(echo $MODIFIED | awk '{print $NF}') <(echo $GITFILES) | sed 's/^/    /' | tac) && \
-    {echo $MODIFIED ; echo $UNMODIFIED} | grep . --color=never
+    GITFILES=$(git ls-files "$GITROOTDIR" --exclude-standard | rg -Fxvf  <(git config --file .gitmodules --name-only --get-regexp path | cut -d '.' -f2-2) ) && \
+    GITFILES=$({ echo $GITFILES | rg -e $FILT ; echo $GITFILES | rg -ve $FILT}) && \
+	MODIFIED=$(git -c color.status=always status --untracked-files=no --ignore-submodules=all | rg "\t.* " | sed -E 's@\t(.*[0-9]+m)(.*): +(.*)(\x1b.*)@\1(\2)\4  \3@' | sort | sort -t ')' -k 2 -u -r | sort -t ")" -k 1,1 ) && \
+    UNMODIFIED=$(rg -Fvxf <(echo $MODIFIED | awk '{print $NF}') <(echo $GITFILES) | sed 's/^/    /' | tac) && \
+    {echo $MODIFIED ; echo $UNMODIFIED} | rg . --color=never
 }
 function _ls-files-git {
     _ls-files-git-with-status | awk -F ' ' '{print $NF}' | tr -d ' '
@@ -187,11 +204,11 @@ function _search-and-edit-line-git {
 	PREVIEW='FILE='$DIR'/$(echo {1} | awk '\''{print $NF}'\''); [ -z {2} ] && LINE=0 || LINE={2}; '
     command -v bat > /dev/null && PREVIEW=$PREVIEW' bat --color=always $FILE --highlight-line $LINE' || PREVIEW=$PREVIEW' less $FILE'
 
-    RG_CMD='/usr/bin/rg -F --color=always --colors \"match:none\" --smart-case'
+    RG_CMD='rg -F --color=always --colors \"match:none\" --smart-case'
     DIR=$(git rev-parse --show-toplevel 2>/dev/null)
     if [ -z "$DIR" ]; then
 		DIR=$PWD
-        #GET_FILES_IN_DIR='Q=%q; locate --existing --database=\$HOME/.locate.db \"\$PWD/*\$Q*\" | rg -v \"/[\\.|_]\" | while IFS= read -r line; do [[ -f \"\$line\" && ! -x \"\$line\" ]] && echo \"\$line\"; done'
+        #GET_FILES_IN_DIR='Q=%q; locate --existing --database=\$LOCATE_DB \"\$PWD/*\$Q*\" | rg -v \"/[\\.|_]\" | while IFS= read -r line; do [[ -f \"\$line\" && ! -x \"\$line\" ]] && echo \"\$line\"; done'
         GET_FILES_IN_DIR=$CD_CMD'; Q=$rg_pat; fd -t f -i \"\$Q\" | '$RG_CMD' \"\$Q\"'
     else
         export TEMP2=$(_ls-files-git-with-status)
@@ -299,7 +316,7 @@ bindkey "^D" _bash-ctrl-d
 ###################################################################
 
 function _zsh-background-init {
-    /usr/bin/updatedb --require-visibility 0 -o $HOME/.locate.db --prune-bind-mounts no
+    /usr/bin/updatedb --require-visibility 0 -o $LOCATE_DB --prune-bind-mounts no
     locate-git-repos-and-status
 }
 function _zsh-background-init-fork {
@@ -314,4 +331,4 @@ if [ -z "$LAST_BG_INIT" -o $(( $(date +%s) > "$LAST_BG_INIT"+3600 )) -eq 1 ]; th
 fi
 
 # activate python venv if exists
-[[ -d ~/.venv/venv ]] && source ~/.venv/venv/bin/activate
+[[ -f ~/.venv/bin/activate ]] && source ~/.venv/bin/activate
