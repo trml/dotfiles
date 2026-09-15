@@ -204,9 +204,10 @@ function _search-and-edit-line-git {
     export TEMP=$(mktemp -u)
     trap 'rm -f "$TEMP"; unset TEMP2' EXIT
 	PREVIEW='FILE='$DIR'/$(echo {1} | awk '\''{print $NF}'\''); [ -z {2} ] && LINE=0 || LINE={2}; '
-    command -v bat > /dev/null && PREVIEW=$PREVIEW' bat --color=always $FILE --highlight-line $LINE' || PREVIEW=$PREVIEW' less $FILE'
+	command -v bat > /dev/null && PREVIEW=$PREVIEW' bat --color=always $FILE --highlight-line $LINE' || PREVIEW=$PREVIEW' less $FILE'
 
-    RG_CMD='rg -F --color=always --colors \"match:none\" --smart-case --field-match-separator :\"\\\0\"'   
+	RG_CMD='rg -F --color=always --colors \"match:none\" --smart-case --field-match-separator :\"\\\0\"'
+	RG_DELIM=':\x00'
     DIR=$(git rev-parse --show-toplevel 2>/dev/null)
     if [ -z "$DIR" ]; then
 		DIR=$PWD
@@ -264,11 +265,11 @@ function _search-and-edit-line-git {
 			--bind 'focus,resize:transform:'$TR_RESIZE \
 			--nth '4..' \
 			--expect=ctrl-e,enter \
-			--delimiter ':\x00' \
+			--delimiter $RG_DELIM \
 		)
 		KEY=$(echo $FR | awk 'NR==1{print $1}' | tr -d " ")
-		FILE=$(echo $FR | awk 'NR==2{print $0}' | awk -F ':' '{print $1}' | awk '{print $NF}' | tr -d " ")
-		LINE=$(echo $FR | awk 'NR==2{print $0}' | awk -F ':' '{print $2}' | tr -d " ")
+		FILE=$(echo $FR | awk 'NR==2{print $0}' | awk -F $RG_DELIM '{print $1}' | awk '{print $NF}' | tr -d " ")
+		LINE=$(echo $FR | awk 'NR==2{print $0}' | awk -F $RG_DELIM '{print $2}' | tr -d " ")
 	fi
 	[ -z $FILE ] && return
 	FILE=$(relativepath $DIR/$FILE)
