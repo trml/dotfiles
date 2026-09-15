@@ -12,10 +12,12 @@ LOCATE_DB=$HOME/.locate.db
 setopt hist_ignore_all_dups hist_ignore_space appendhistory share_history
 setopt extendedglob nomatch completealiases interactivecomments always_to_end
 setopt prompt_subst
+setopt globdots
 unsetopt beep notify list_beep flow_control menu_complete
 bindkey -e
 typeset -A key
 bindkey -s " " " "
+_comp_options+=(globdots)
 
 PROMPT='%F{cyan}%2~%F{red}$(git branch 2>/dev/null | rg "\*" | awk '\''{print " " $NF }'\'' | sed "s/)//g")%F{3}> %f'
 
@@ -204,7 +206,7 @@ function _search-and-edit-line-git {
 	PREVIEW='FILE='$DIR'/$(echo {1} | awk '\''{print $NF}'\''); [ -z {2} ] && LINE=0 || LINE={2}; '
     command -v bat > /dev/null && PREVIEW=$PREVIEW' bat --color=always $FILE --highlight-line $LINE' || PREVIEW=$PREVIEW' less $FILE'
 
-    RG_CMD='rg -F --color=always --colors \"match:none\" --smart-case'
+    RG_CMD='rg -F --color=never --smart-case --field-match-separator :'\'\\\\\\\0\'
     DIR=$(git rev-parse --show-toplevel 2>/dev/null)
     if [ -z "$DIR" ]; then
 		DIR=$PWD
@@ -260,9 +262,9 @@ function _search-and-edit-line-git {
 			--preview-window 'hidden,+{2}+3/3,~3' \
 			--bind 'start,change:transform:'$TR_CHANGE \
 			--bind 'focus,resize:transform:'$TR_RESIZE \
-			--nth -1 \
+			--nth '4..' \
 			--expect=ctrl-e,enter \
-			--delimiter : \
+			--delimiter ':\x00' \
 		)
 		KEY=$(echo $FR | awk 'NR==1{print $1}' | tr -d " ")
 		FILE=$(echo $FR | awk 'NR==2{print $0}' | awk -F ':' '{print $1}' | awk '{print $NF}' | tr -d " ")
