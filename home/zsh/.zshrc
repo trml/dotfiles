@@ -263,7 +263,7 @@ function _search-and-edit-line-git {
 			--preview-window 'hidden,+{2}+3/3,~3' \
 			--bind 'start,change:transform:'$TR_CHANGE \
 			--bind 'focus,resize:transform:'$TR_RESIZE \
-			--nth '4..' \
+			--nth '-1' \
 			--expect=ctrl-e,enter \
 			--delimiter $RG_DELIM \
 		)
