@@ -206,7 +206,7 @@ function _search-and-edit-line-git {
 	PREVIEW='FILE='$DIR'/$(echo {1} | awk '\''{print $NF}'\''); [ -z {2} ] && LINE=0 || LINE={2}; '
     command -v bat > /dev/null && PREVIEW=$PREVIEW' bat --color=always $FILE --highlight-line $LINE' || PREVIEW=$PREVIEW' less $FILE'
 
-    RG_CMD='rg -F --color=never --smart-case --field-match-separator :'\'\\\\\\\0\'
+    RG_CMD='rg -F --color=always --colors \"match:none\" --smart-case --field-match-separator :\"\\\0\"'   
     DIR=$(git rev-parse --show-toplevel 2>/dev/null)
     if [ -z "$DIR" ]; then
 		DIR=$PWD
