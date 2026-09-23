@@ -9,7 +9,7 @@ SAVEHIST=$HISTSIZE
 
 LOCATE_DB=$HOME/.locate.db
 
-setopt hist_ignore_all_dups hist_ignore_space appendhistory share_history
+setopt hist_ignore_dups hist_ignore_space inc_append_history
 setopt extendedglob nomatch completealiases interactivecomments always_to_end
 setopt prompt_subst
 setopt globdots
@@ -21,7 +21,7 @@ _comp_options+=(globdots)
 
 PROMPT='%F{cyan}%2~%F{red}$(git branch 2>/dev/null | rg "\*" | awk '\''{print " " $NF }'\'' | sed "s/)//g")%F{3}> %f'
 
-HISTORY_IGNORE="(ls(|*)|cd(|*)|pwd|exit|whoami|vim * +*|nvim * +*)"
+HISTORY_IGNORE="(ls|cd|pwd|exit|whoami|vim * +*|nvim * +*)"
 zshaddhistory()
 {
   emulate -L zsh
@@ -276,12 +276,10 @@ function _search-and-edit-line-git {
 	if [[ $KEY != "enter" ]]; then
 		zle kill-whole-line && zle -U $FILE
 	else
-		if [ -z $LINE ]; then
-			commandline-execute "$CMD $FILE"
-		else
-			#print -s "$CMD $FILE"
-			commandline-execute " $CMD $FILE +$LINE"
-		fi
+		print -s "$CMD $FILE"
+		[ ! -z $LINE ] && LINE="+"$LINE
+		$CMD $FILE $LINE
+		#commandline-execute "$CMD $FILE +$LINE"
 	fi
 }
 zle -N _search-and-edit-line-git
