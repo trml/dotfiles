@@ -147,7 +147,7 @@ function _print-git-repo-name-and-status {
     MOD=$(git status --untracked-files=no --ignore-submodules=all --short | cut -c1-3)
     NUM=$(echo $MOD | rg . | wc -l)
     if [ $NUM -eq 0 ]; then
-        if [ $(git log --branches --not --remotes | wc -l) -gt 0 ]; then
+        if [ $(git log origin/$(git branch --show-current)..HEAD 2>&1 | wc -l) -gt 0 ]; then
             ST=" (unpushed)"
             ST="\e[0;33m$ST\e[0m"
         else
