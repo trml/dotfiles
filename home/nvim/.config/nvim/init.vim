@@ -22,6 +22,7 @@ autocmd BufEnter * setlocal formatoptions-=cro
 if has('nvim')
 	lua vim.api.nvim_create_autocmd("FileType", { callback = function() vim.opt_local.formatoptions:remove({"c","r","o"}) end, })
 endif
+autocmd! nvim.swapfile
 
 set viewoptions=cursor,folds,slash,unix
 set grepprg=grep\ -nH\ $*
@@ -58,6 +59,7 @@ map <C-a> <Nop> " disable decrement/incrementing number under cursor on ctrl-a/c
 map <C-x> <Nop>
 map g<C-a> <Nop>
 map g<C-x> <Nop>
+nnoremap ~ <Nop> " disable switching character cases (upper, lower)
 
 autocmd BufReadPost * if line("'\"") >= 1 && line("'\"") <= line("$") && &filetype !~# 'commit' && index(['xxd', 'gitrebase'], &filetype) == -1 && !&diff | exe "normal! g`\"" | endif
 
