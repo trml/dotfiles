@@ -26,6 +26,14 @@ zshaddhistory()
 {
   emulate -L zsh
   [[ $1 != ${~HISTORY_IGNORE} ]]
+  emulate -L zsh
+  [[ $1 != ${~HISTORY_IGNORE} ]]
+  local cmd="${1%%$'\n'}"
+  if [[ "$cmd" == $EDITOR\ * ]]; then
+    cmd="${cmd% +<->}"
+  fi
+  print -sr -- "$cmd"
+  return 1
 }
 
 str_abbrev() {
@@ -63,7 +71,7 @@ function ztrim() { sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' "$@" }
 
 alias git='noglob git'
 alias viless='/usr/share/nvim/runtime/scripts/less.sh'
-alias reswap='sudo /bin/swapoff -a && sudo /bin/swapon -a'
+alias reswap='sudo swapoff -a && sudo swapon -a'
 alias ls='ls -AF --color=auto'
 alias sudo='sudo '
 alias sourcesh="source $HOME/.zshrc"
