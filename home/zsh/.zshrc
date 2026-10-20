@@ -26,8 +26,6 @@ zshaddhistory()
 {
   emulate -L zsh
   [[ $1 != ${~HISTORY_IGNORE} ]]
-  emulate -L zsh
-  [[ $1 != ${~HISTORY_IGNORE} ]]
   local cmd="${1%%$'\n'}"
   if [[ "$cmd" == $EDITOR\ * ]]; then
     cmd="${cmd% +<->}"
